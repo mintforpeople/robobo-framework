@@ -41,14 +41,13 @@ public class FrameworkManager
     }
     
     
-    void startup() throws InternalErrorException {
+    public void startup() throws InternalErrorException {
         
         while(isNextModule()) {
             
             try {
                 
                 IModule module = registerNextModule();
-                this.modules.add(module);
                 module.startup(this);
                 
             } catch (ClassNotFoundException ex) {
@@ -64,7 +63,7 @@ public class FrameworkManager
     }
     
     
-    void shutdown() throws InternalErrorException {
+    public void shutdown() throws InternalErrorException {
     
         Iterator<IModule> modulesIterator = this.modules.descendingIterator();
         
@@ -78,7 +77,9 @@ public class FrameworkManager
         modulesIterator = this.modules.descendingIterator();
         
         while(modulesIterator.hasNext()) {
-            removeModule(modulesIterator.next());
+            IModule module = modulesIterator.next();
+            this.diContainer.unregister(module.getClass());
+            modulesIterator.remove();
         }
         
     }
