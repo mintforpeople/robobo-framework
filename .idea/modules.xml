@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/framework-lib/framework-lib.iml" filepath="$PROJECT_DIR$/framework-lib/framework-lib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/robobo-framework.iml" filepath="$PROJECT_DIR$/robobo-framework.iml" />
+    </modules>
+  </component>
+</project>
