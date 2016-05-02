@@ -59,5 +59,10 @@ public interface IModule
      * @throws com.mytechia.commons.framework.exception.InternalErrorException if there was any error during shutdown
      */
     public void shutdown() throws InternalErrorException;
+
+
+    public String getModuleInfo();
+
+    public String getModuleVersion();
     
 }

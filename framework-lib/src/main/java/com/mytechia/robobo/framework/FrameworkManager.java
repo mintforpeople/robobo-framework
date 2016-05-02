@@ -28,6 +28,8 @@ import android.content.Context;
 import com.mytechia.commons.di.container.IDIContainer;
 import com.mytechia.commons.di.container.PicoContainerWrapper;
 import com.mytechia.commons.framework.exception.InternalErrorException;
+
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Objects;
@@ -63,6 +65,10 @@ public class FrameworkManager
     
     private int modulesIndex = 0;
 
+    private FrameworkState state = FrameworkState.CREATED;
+
+    private final ArrayList<FrameworkListener> listeners;
+
 
 
     private FrameworkManager(Properties modulesFile, Activity mainActivity) {
@@ -71,6 +77,7 @@ public class FrameworkManager
         if (mainActivity != null) this.androidContext = mainActivity.getApplicationContext();
         this.modules = new LinkedList<>();
         this.diContainer = new PicoContainerWrapper();
+        this.listeners = new ArrayList<>(2);
     }
 
 
@@ -90,13 +97,18 @@ public class FrameworkManager
      * @throws InternalErrorException if there was an error while loading the modules
      */
     public void startup() throws InternalErrorException {
-        
+
         while(isNextModule()) {
             
             try {
                 
                 IModule module = registerNextModule();
+
+                notifyLoadingModule(module);
+
                 module.startup(this);
+
+                notifyModuleLoaded(module);
                 
             } catch (ClassNotFoundException ex) {
                 throw new InternalErrorException(ex);
@@ -224,5 +236,40 @@ public class FrameworkManager
     public Context getApplicationContext() {
         return this.androidContext;
     }
-    
+
+
+
+    private void frameworkStateChanged(FrameworkState state) {
+
+        this.state = state;
+
+        for(FrameworkListener listener : this.listeners) {
+            listener.frameworkStateChanged(state);
+        }
+
+    }
+
+
+    private void notifyLoadingModule(IModule module) {
+
+        String moduleInfo = module.getModuleInfo();
+        String moduleVersion = module.getModuleVersion();
+
+        for(FrameworkListener listener : this.listeners) {
+            listener.loadingModule(moduleInfo, moduleVersion);
+        }
+
+    }
+
+    private void notifyModuleLoaded(IModule module) {
+
+        String moduleInfo = module.getModuleInfo();
+        String moduleVersion = module.getModuleVersion();
+
+        for(FrameworkListener listener : this.listeners) {
+            listener.moduleLoaded(moduleInfo, moduleVersion);
+        }
+
+    }
+
 }
