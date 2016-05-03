@@ -20,35 +20,27 @@
  *
  ******************************************************************************/
 
-
-package com.mytechia.robobo.framework;
-
-import com.mytechia.commons.framework.exception.InternalErrorException;
-import com.mytechia.robobo.framework.FrameworkManager;
-import com.mytechia.robobo.framework.IModule;
+package com.mytechia.robobo.framework.example.dummy;
 
 /**
  *
  * @author Gervasio Varela
  */
-public class DummyTestModule implements IModule
+public class DummyTestModule2 extends DummyTestModule
 {
-    
-    private final int id;
-    
-    public DummyTestModule(int id) {
-        this.id = id;
+
+    public DummyTestModule2() {
+        super(2);
     }
-    
+
 
     @Override
-    public void startup(FrameworkManager manager) throws InternalErrorException {
-        System.out.println(String.format("Starting up dummy module %d!", id));
+    public String getModuleInfo() {
+        return "Dummy Test Module 2";
     }
 
     @Override
-    public void shutdown() throws InternalErrorException {
-        System.out.println(String.format("Shutting down dummy module %d!", id));
+    public String getModuleVersion() {
+        return "0.1";
     }
-
 }

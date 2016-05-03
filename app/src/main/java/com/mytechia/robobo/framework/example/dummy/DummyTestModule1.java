@@ -20,19 +20,28 @@
  *
  ******************************************************************************/
 
-package com.mytechia.robobo.framework;
+
+package com.mytechia.robobo.framework.example.dummy;
 
 /**
  *
  * @author Gervasio Varela
  */
-public class DummyTestModule2 extends DummyTestModule
+public class DummyTestModule1 extends DummyTestModule
 {
 
-    public DummyTestModule2() {
-        super(2);
+    public DummyTestModule1() {
+        super(1);
     }
 
-    
-    
+
+    @Override
+    public String getModuleInfo() {
+        return "Dummy Test Module 1";
+    }
+
+    @Override
+    public String getModuleVersion() {
+        return "0.1";
+    }
 }

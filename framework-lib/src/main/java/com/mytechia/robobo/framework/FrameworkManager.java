@@ -109,14 +109,18 @@ public class FrameworkManager
                 module.startup(this);
 
                 notifyModuleLoaded(module);
-                
+
             } catch (ClassNotFoundException ex) {
-                throw new InternalErrorException(ex);
+                throw new InternalErrorException(ex.getMessage());
             } catch (InstantiationException ex) {
                 throw new InternalErrorException(ex);
             } catch (IllegalAccessException ex) {
                 throw new InternalErrorException(ex);
             }
+
+            frameworkStateChanged(FrameworkState.ALL_MODULES_LOADED);
+
+            frameworkStateChanged(FrameworkState.RUNNING);
             
         }
         
@@ -270,6 +274,15 @@ public class FrameworkManager
             listener.moduleLoaded(moduleInfo, moduleVersion);
         }
 
+    }
+
+
+    public void addFrameworkListener(FrameworkListener listener) {
+        this.listeners.add(listener);
+    }
+
+    public void removeFrameworkListener(FrameworkListener listener) {
+        this.listeners.remove(listener);
     }
 
 }

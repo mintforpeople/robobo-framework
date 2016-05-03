@@ -20,12 +20,11 @@
  *
  ******************************************************************************/
 
-package com.mytechia.robobo.framework;
-
-import android.app.Activity;
+package com.mytechia.robobo.framework.example.dummy;
 
 import com.mytechia.commons.framework.exception.InternalErrorException;
 import com.mytechia.robobo.framework.FrameworkManager;
+
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -72,8 +71,8 @@ public class FrameworkManagerTest {
     public void testStartup() {
 
         Properties modules = new Properties();
-        modules.put("robobo.module.0", "com.mytechia.robobo.framework.DummyTestModule1");
-        modules.put("robobo.module.1", "com.mytechia.robobo.framework.DummyTestModule2");
+        modules.put("robobo.module.0", "com.mytechia.robobo.framework.example.dummy.DummyTestModule1");
+        modules.put("robobo.module.1", "com.mytechia.robobo.framework.example.dummy.DummyTestModule2");
 
 
         FrameworkManager frameworkManager = FrameworkManager.instantiate(modules, null);
