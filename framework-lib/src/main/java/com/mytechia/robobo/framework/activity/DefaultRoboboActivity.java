@@ -1,8 +1,9 @@
-package com.mytechia.robobo.framework.app;
+package com.mytechia.robobo.framework.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -21,26 +22,34 @@ import java.util.Properties;
 public abstract class DefaultRoboboActivity extends Activity implements FrameworkListener {
 
     private FrameworkManager roboboFramework;
-    private Activity mainActivity;
+    private Class mainActivityClass;
 
-    private TextView txtLoading;
-    private Button btnLaunchApp;
-
-    private RoboboApp roboboApp;
+    private TextView txtStatus;
+    private Button btnContinue;
+    private Button btnExit;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_default_robobo);
-        this.mainActivity = this;
 
-        txtLoading = (TextView) findViewById(R.id.txtLoading);
-        this.btnLaunchApp = (Button) findViewById(R.id.btnLaunch);
-        this.btnLaunchApp.setOnClickListener(new View.OnClickListener() {
+        txtStatus = (TextView) findViewById(R.id.txtStatus);
+
+        this.btnExit = (Button) findViewById(R.id.btnExit);
+        this.btnExit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new LaunchAppTask().execute();
+                finish();
+                System.exit(0);
+            }
+        });
+
+        this.btnContinue = (Button) findViewById(R.id.btnContinue);
+        this.btnContinue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchMainActivity();
             }
         });
 
@@ -49,17 +58,30 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
     }
 
 
-    protected void setRoboboApp(RoboboApp customRoboboAppInstance) {
-        this.roboboApp = customRoboboAppInstance;
+    protected abstract void startRoboboApplication();
+
+
+
+    protected void setMainActivityClass(Class activityClass) {
+        this.mainActivityClass = activityClass;
     }
+
+    protected Class getMainActivityClass() {
+        return this.mainActivityClass;
+    }
+
 
 
     protected FrameworkManager getRoboboFramework() {
         return this.roboboFramework;
     }
 
-    protected RoboboApp getRoboboApp() {
-        return this.roboboApp;
+
+    protected void launchMainActivity() {
+        if (getMainActivityClass() != null) {
+            Intent myIntent = new Intent(DefaultRoboboActivity.this, getMainActivityClass());
+            DefaultRoboboActivity.this.startActivity(myIntent);
+        }
     }
 
 
@@ -83,20 +105,6 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
     }
 
 
-    private class LaunchAppTask extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... params) {
-
-            getRoboboApp().init(roboboFramework, mainActivity);
-            getRoboboApp().start();
-
-            return null;
-
-        }
-    }
-
-
     private class InitRoboboFrameworkTask extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -106,6 +114,9 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
 
                 initFramework();
 
+                startRoboboApplication();
+
+                launchMainActivity();
 
             } catch (IOException e) {
                 runOnUiThread(new Runnable() {
@@ -150,7 +161,7 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                txtLoading.setText("Loading module: "+moduleInfo);
+                txtStatus.setText("Loading module: "+moduleInfo);
             }
         });
     }
@@ -167,7 +178,7 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    txtLoading.setText("Framework started succesfully!");
+                    txtStatus.setText("Robobo is running!");
                 }
             });
         }

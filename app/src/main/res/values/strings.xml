@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Robobo Framework</string>
+    <string name="title_activity_robobo_custom_main">RoboboCustomMainActivity</string>
 </resources>

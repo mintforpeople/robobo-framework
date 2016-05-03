@@ -21,13 +21,15 @@ android {
 }
 
 dependencies {
-    compile 'com.mytechia:mytechia-commons-library:1.3.0'
-    compile 'com.mytechia:mytechia-commons-di:1.3.0'
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
+    compile 'com.mytechia:mytechia-commons-library:1.3.0'
+    compile 'com.mytechia:mytechia-commons-di:1.3.0'
+    compile 'com.android.support:appcompat-v7:23.3.0'
 }
 
 apply from: 'https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle'
+
 
 
 afterEvaluate { project ->

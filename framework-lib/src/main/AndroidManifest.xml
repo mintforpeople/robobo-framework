@@ -6,12 +6,7 @@
         android:allowBackup="true"
         android:label="@string/app_name"
         android:supportsRtl="true">
-        <activity android:name=".app.DefaultRoboboActivity" />
-
-        <service
-            android:name=".service.RoboboService"
-            android:enabled="true"
-            android:exported="true"></service>
+        <activity android:name=".activity.DefaultRoboboActivity" />
     </application>
 
 </manifest>
