@@ -19,10 +19,13 @@
  *   along with Robobo Framework Library.  If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+
 package com.mytechia.robobo.framework;
 
-/**
- * Created by gervasio on 2/5/16.
+
+/** A listener that receives life-cycle events from the Framework Manager
+ *
+ * @author Gervasio Varela
  */
 public interface FrameworkListener {
 

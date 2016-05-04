@@ -106,6 +106,12 @@ public class FrameworkManager
 
                 notifyLoadingModule(module);
 
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
                 module.startup(this);
 
                 notifyModuleLoaded(module);

@@ -1,3 +1,25 @@
+/*******************************************************************************
+ *
+ *   Copyright 2016 Mytech Ingenieria Aplicada <http://www.mytechia.com>
+ *   Copyright 2016 Gervasio Varela <gervasio.varela@mytechia.com>
+ *
+ *   This file is part of Robobo Framework Library.
+ *
+ *   Robobo Framework Library is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU Lesser General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Robobo Framework Library is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU Lesser General Public License for more details.
+ *
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with Robobo Framework Library.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+
 package com.mytechia.robobo.framework.activity;
 
 import android.app.Activity;
@@ -19,6 +41,24 @@ import com.mytechia.robobo.framework.R;
 import java.io.IOException;
 import java.util.Properties;
 
+/** This class provides a skeleton Activity to build new custom Robobo applications.
+ *
+ * It provides the code required to initialize and load the Robobo Framework, and
+ * a skeleton method to provide the custom code of the application.
+ *
+ * Furthermore, this Activity automatically launches a second activity, known as 'Display Activity'
+ * that is going to be shown in the display of the Robobo during the execution of the
+ * Application.
+ *
+ * In order to implement a new Robobo application the developer must chose between two options:
+ * - The easy way is to subclass this Activity and override the onCreate method to specify the
+ *   Display Activity with the method setDisplayActivityClass(MyActivity.class) and them initialize
+ *   a thread with the custom app code by implementing the method startRoboboApplication()
+ *
+ * - The not so easy way is to implement a custom Android Activity and directly instantiate
+ *   and use the RoboboFramework using FrameworkManager.instantiate()
+ *
+ */
 public abstract class DefaultRoboboActivity extends Activity implements FrameworkListener {
 
     private FrameworkManager roboboFramework;
@@ -36,6 +76,8 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
 
         txtStatus = (TextView) findViewById(R.id.txtStatus);
 
+        /** This button is used to finish and exit the Robobo application
+         */
         this.btnExit = (Button) findViewById(R.id.btnExit);
         this.btnExit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,6 +87,9 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
             }
         });
 
+        /** This button changes the display again to the main activity
+         * of this Robobo application
+         */
         this.btnContinue = (Button) findViewById(R.id.btnContinue);
         this.btnContinue.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,25 +103,42 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
     }
 
 
+    /** Custom Robobo applications must override this method
+     * to start their custom application code (threads, etc.)
+     */
     protected abstract void startRoboboApplication();
 
 
-
+    /** Sets the class of the activity that is going to be shown as display for
+     * this application.
+     *
+     * @param activityClass main activity of this Robobo application
+     */
     protected void setMainActivityClass(Class activityClass) {
         this.mainActivityClass = activityClass;
     }
 
+    /** Gets a references to the class of the activity shown in the display
+     * for this application.
+     *
+     * @return returns the class of the activity shown for this application
+     */
     protected Class getMainActivityClass() {
         return this.mainActivityClass;
     }
 
 
-
+    /** Gets the references to the Robobo Framework manager
+     *
+     * @return a reference to the Robobo Framework manager
+     */
     protected FrameworkManager getRoboboFramework() {
         return this.roboboFramework;
     }
 
 
+    /** Starts the main activity
+     */
     protected void launchMainActivity() {
         if (getMainActivityClass() != null) {
             Intent myIntent = new Intent(DefaultRoboboActivity.this, getMainActivityClass());
@@ -85,11 +147,15 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
     }
 
 
+    /** Shows an error dialog with the message 'msg'
+     *
+     * @param msg the message to be shown in the error dialog
+     */
     protected void showErrorDialog(String msg) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(DefaultRoboboActivity.this);
 
-        builder.setTitle("Robobo Framework Error").
+        builder.setTitle(R.string.title_error_dialog).
                 setMessage(msg);
         builder.setPositiveButton(R.string.ok_msg, new DialogInterface.OnClickListener() {
             @Override
@@ -105,6 +171,9 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
     }
 
 
+    /** Asynchronous task to initialize the Robobo Framework an set up the
+     * UI of the application.
+     */
     private class InitRoboboFrameworkTask extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -122,7 +191,7 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        showErrorDialog("Unable to read Robobo Framework Configuration.");
+                        showErrorDialog(getText(R.string.error_unable_read_configuration).toString());
                     }
                 });
             } catch (InternalErrorException e) {
@@ -130,7 +199,7 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        showErrorDialog("Unable to load module class:" + errorMsg);
+                        showErrorDialog(getText(R.string.error_unable_read_configuration).toString() + errorMsg);
                     }
                 });
             }
@@ -142,7 +211,12 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
     }
 
 
-    public void initFramework() throws IOException, InternalErrorException {
+    /** Initializes the Robobo Framework
+     *
+     * @throws IOException if there was a problem reading module's configuration
+     * @throws InternalErrorException if there was a problem loading some Robobo module
+     */
+    protected void initFramework() throws IOException, InternalErrorException {
 
         Properties modulesProperties = new Properties();
         modulesProperties.load(getApplicationContext().getAssets().open("modules.properties"));
@@ -161,7 +235,7 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                txtStatus.setText("Loading module: "+moduleInfo);
+                txtStatus.setText(getText(R.string.msg_loading_module).toString()+moduleInfo);
             }
         });
     }
@@ -178,7 +252,8 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    txtStatus.setText("Robobo is running!");
+                    txtStatus.setText(getText(R.string.msg_framework_running));
+                    btnContinue.setEnabled(true);
                 }
             });
         }

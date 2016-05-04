@@ -32,7 +32,7 @@ import com.mytechia.commons.framework.exception.InternalErrorException;
  * so that the framework can manage the startup and stop of the robot.
  * 
  * Once started, a module is free to use and create any resource required
- * (threads or whatever) for their operation, but they must free all resource
+ * (threads or whatever) for their operation, but they must free all resources
  * on shutdown.
  * 
  * The modules receives an instance of the FrameworkManager during startup. It
