@@ -39,6 +39,7 @@ import com.mytechia.robobo.framework.FrameworkState;
 import com.mytechia.robobo.framework.R;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 /** This class provides a skeleton Activity to build new custom Robobo applications.
@@ -63,6 +64,7 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
 
     private FrameworkManager roboboFramework;
     private Class mainActivityClass;
+    private Properties modulesProperties;
 
     private TextView txtStatus;
     private Button btnContinue;
@@ -107,6 +109,18 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
      * to start their custom application code (threads, etc.)
      */
     protected abstract void startRoboboApplication();
+
+
+    /** Sets the properties file used to load a custom set of Robobo modules.
+     * This method should be called in the onCreate() method of custom
+     * applications. If the properties is not set, the framwork will try to start
+     * with a default set of modules.
+     *
+     * @param modulesProperties properties file with the modules configuration
+     */
+    protected void setModulesProperties(Properties modulesProperties) {
+        this.modulesProperties = modulesProperties;
+    }
 
 
     /** Sets the class of the activity that is going to be shown as display for
@@ -218,8 +232,10 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
      */
     protected void initFramework() throws IOException, InternalErrorException {
 
-        Properties modulesProperties = new Properties();
-        modulesProperties.load(getApplicationContext().getAssets().open("modules.properties"));
+        if (modulesProperties == null) {
+            modulesProperties = new Properties();
+            modulesProperties.load(getApplicationContext().getAssets().open("modules.properties"));
+        }
 
         this.roboboFramework = FrameworkManager.instantiate(modulesProperties, this);
 

@@ -27,6 +27,10 @@ import com.mytechia.robobo.framework.FrameworkManager;
 import com.mytechia.robobo.framework.activity.DefaultRoboboActivity;
 import com.mytechia.robobo.framework.example.dummy.DummyTestModule1;
 
+import java.io.IOException;
+import java.util.Properties;
+
+
 /** An example of how to use DefaultRoboboActivity to easily build a new
  * custom Robobo Application.
  *
@@ -39,8 +43,23 @@ public class RoboboExampleActivity extends DefaultRoboboActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
+        //specify the custom set of Robobo modules
+        try {
+            Properties modulesProperties = new Properties();
+            modulesProperties.load(getApplicationContext().getAssets().open("modules.properties"));
+            setModulesProperties(modulesProperties);
+        }
+        catch(IOException ex) {
+            showErrorDialog(getText(R.string.error_unable_read_configuration).toString());
+        }
+
+
         //set the display activity class
         setMainActivityClass(RoboboCustomMainActivity.class);
+
+
         super.onCreate(savedInstanceState);
     }
 

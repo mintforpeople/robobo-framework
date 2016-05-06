@@ -70,7 +70,14 @@ public class FrameworkManager
     private final ArrayList<FrameworkListener> listeners;
 
 
+    private static FrameworkManager _instance = null;
 
+
+    /**
+     *
+     * @param modulesFile
+     * @param mainActivity
+     */
     private FrameworkManager(Properties modulesFile, Activity mainActivity) {
         this.modulesFile = modulesFile;
         this.mainActivity = mainActivity;
@@ -86,9 +93,20 @@ public class FrameworkManager
      *
      * @param modulesFile a properties file with the modules to load
      * @param mainActivity the main Activity of the Robobo Android application
+     * @return a new instance of FrameworkManager
      */
     public static final FrameworkManager instantiate(Properties modulesFile, Activity mainActivity) {
-        return new FrameworkManager(modulesFile, mainActivity);
+        _instance = new FrameworkManager(modulesFile, mainActivity);
+        return _instance;
+    }
+
+
+    /** Returns the current singleton instance of the FrameworkManager
+     *
+     * @return the current singleton instance of the FrameworkMangaer
+     */
+    public static final FrameworkManager getInstance() {
+        return _instance;
     }
 
 
@@ -105,12 +123,6 @@ public class FrameworkManager
                 IModule module = registerNextModule();
 
                 notifyLoadingModule(module);
-
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
 
                 module.startup(this);
 
@@ -196,7 +208,6 @@ public class FrameworkManager
     /** Returns the instance of the request Robobo module
      *
      * @param moduleClass the class of the module requested
-     * @param <T>
      * @return the instance of the module requested
      */
     public <T> T getModuleInstance(Class<T> moduleClass) {
