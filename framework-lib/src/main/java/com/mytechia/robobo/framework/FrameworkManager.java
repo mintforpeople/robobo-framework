@@ -28,6 +28,7 @@ import android.content.Context;
 import com.mytechia.commons.di.container.IDIContainer;
 import com.mytechia.commons.di.container.PicoContainerWrapper;
 import com.mytechia.commons.framework.exception.InternalErrorException;
+import com.mytechia.robobo.framework.exception.ModuleNotFoundException;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -210,12 +211,19 @@ public class FrameworkManager
      * @param moduleClass the class of the module requested
      * @return the instance of the module requested
      */
-    public <T> T getModuleInstance(Class<T> moduleClass) {
+    public <T> T getModuleInstance(Class<T> moduleClass) throws ModuleNotFoundException {
         
         Objects.requireNonNull(moduleClass, "The parameter clazz is required");
-        
-        return this.diContainer.getInstance(moduleClass);
-        
+
+        T module = this.diContainer.getInstance(moduleClass);
+
+        if (module == null) {
+            throw new ModuleNotFoundException(moduleClass.getCanonicalName());
+        }
+        else {
+            return module;
+        }
+
     }
 
 

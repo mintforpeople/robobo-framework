@@ -26,6 +26,7 @@ import android.os.Bundle;
 import com.mytechia.robobo.framework.FrameworkManager;
 import com.mytechia.robobo.framework.activity.DefaultRoboboActivity;
 import com.mytechia.robobo.framework.example.dummy.DummyTestModule1;
+import com.mytechia.robobo.framework.exception.ModuleNotFoundException;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -57,7 +58,7 @@ public class RoboboExampleActivity extends DefaultRoboboActivity {
 
 
         //set the display activity class
-        setMainActivityClass(RoboboCustomMainActivity.class);
+        setDisplayActivityClass(RoboboCustomMainActivity.class);
 
 
         super.onCreate(savedInstanceState);
@@ -81,7 +82,15 @@ public class RoboboExampleActivity extends DefaultRoboboActivity {
 
         public RoboboApp(FrameworkManager roboboManager) {
             this.roboboManager = roboboManager;
-            roboboModule1 = this.roboboManager.getModuleInstance(DummyTestModule1.class);
+
+            try {
+                roboboModule1 = this.roboboManager.getModuleInstance(DummyTestModule1.class);
+            }
+            catch(ModuleNotFoundException ex) {
+                showErrorDialog("Module not found: "+ex.getMessage());
+            }
+
+
         }
 
 

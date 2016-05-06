@@ -39,7 +39,6 @@ import com.mytechia.robobo.framework.FrameworkState;
 import com.mytechia.robobo.framework.R;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 /** This class provides a skeleton Activity to build new custom Robobo applications.
@@ -63,7 +62,7 @@ import java.util.Properties;
 public abstract class DefaultRoboboActivity extends Activity implements FrameworkListener {
 
     private FrameworkManager roboboFramework;
-    private Class mainActivityClass;
+    private Class displayActivityClass;
     private Properties modulesProperties;
 
     private TextView txtStatus;
@@ -128,8 +127,8 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
      *
      * @param activityClass main activity of this Robobo application
      */
-    protected void setMainActivityClass(Class activityClass) {
-        this.mainActivityClass = activityClass;
+    protected void setDisplayActivityClass(Class activityClass) {
+        this.displayActivityClass = activityClass;
     }
 
     /** Gets a references to the class of the activity shown in the display
@@ -137,8 +136,8 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
      *
      * @return returns the class of the activity shown for this application
      */
-    protected Class getMainActivityClass() {
-        return this.mainActivityClass;
+    protected Class getDisplayActivityClass() {
+        return this.displayActivityClass;
     }
 
 
@@ -154,8 +153,8 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
     /** Starts the main activity
      */
     protected void launchMainActivity() {
-        if (getMainActivityClass() != null) {
-            Intent myIntent = new Intent(DefaultRoboboActivity.this, getMainActivityClass());
+        if (getDisplayActivityClass() != null) {
+            Intent myIntent = new Intent(DefaultRoboboActivity.this, getDisplayActivityClass());
             DefaultRoboboActivity.this.startActivity(myIntent);
         }
     }
