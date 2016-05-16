@@ -23,7 +23,9 @@
 package com.mytechia.robobo.framework;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
+import android.os.Binder;
 
 import com.mytechia.commons.di.container.IDIContainer;
 import com.mytechia.commons.di.container.PicoContainerWrapper;
@@ -50,7 +52,7 @@ import java.util.Properties;
  *
  * @author Gervasio Varela
  */
-public class FrameworkManager 
+public class FrameworkManager extends Binder
 {
 
     private final String MODULE_LOADER_KEY = "robobo.module.%d";
@@ -58,8 +60,7 @@ public class FrameworkManager
 
     private final Properties modulesFile;
 
-    private Activity mainActivity;
-    private Context androidContext;
+    private Application app;
 
     private final LinkedList<IModule> modules;
     private final IDIContainer diContainer;
@@ -77,12 +78,11 @@ public class FrameworkManager
     /**
      *
      * @param modulesFile
-     * @param mainActivity
+     * @param app
      */
-    private FrameworkManager(Properties modulesFile, Activity mainActivity) {
+    private FrameworkManager(Properties modulesFile, Application app) {
         this.modulesFile = modulesFile;
-        this.mainActivity = mainActivity;
-        if (mainActivity != null) this.androidContext = mainActivity.getApplicationContext();
+        this.app = app;
         this.modules = new LinkedList<>();
         this.diContainer = new PicoContainerWrapper();
         this.listeners = new ArrayList<>(2);
@@ -93,11 +93,11 @@ public class FrameworkManager
      * Android context will not be available for modules.
      *
      * @param modulesFile a properties file with the modules to load
-     * @param mainActivity the main Activity of the Robobo Android application
+     * @param app the Robobo Android application
      * @return a new instance of FrameworkManager
      */
-    public static final FrameworkManager instantiate(Properties modulesFile, Activity mainActivity) {
-        _instance = new FrameworkManager(modulesFile, mainActivity);
+    public static final FrameworkManager instantiate(Properties modulesFile, Application app) {
+        _instance = new FrameworkManager(modulesFile, app);
         return _instance;
     }
 
@@ -117,30 +117,34 @@ public class FrameworkManager
      */
     public void startup() throws InternalErrorException {
 
-        while(isNextModule()) {
-            
-            try {
-                
-                IModule module = registerNextModule();
+        if (state == FrameworkState.CREATED) {
 
-                notifyLoadingModule(module);
+            while (isNextModule()) {
 
-                module.startup(this);
+                try {
 
-                notifyModuleLoaded(module);
+                    IModule module = registerNextModule();
 
-            } catch (ClassNotFoundException ex) {
-                throw new InternalErrorException(ex.getMessage());
-            } catch (InstantiationException ex) {
-                throw new InternalErrorException(ex);
-            } catch (IllegalAccessException ex) {
-                throw new InternalErrorException(ex);
+                    notifyLoadingModule(module);
+
+                    module.startup(this);
+
+                    notifyModuleLoaded(module);
+
+                } catch (ClassNotFoundException ex) {
+                    throw new InternalErrorException(ex.getMessage());
+                } catch (InstantiationException ex) {
+                    throw new InternalErrorException(ex);
+                } catch (IllegalAccessException ex) {
+                    throw new InternalErrorException(ex);
+                }
+
+                frameworkStateChanged(FrameworkState.ALL_MODULES_LOADED);
+
+                frameworkStateChanged(FrameworkState.RUNNING);
+
             }
 
-            frameworkStateChanged(FrameworkState.ALL_MODULES_LOADED);
-
-            frameworkStateChanged(FrameworkState.RUNNING);
-            
         }
         
     }
@@ -263,9 +267,13 @@ public class FrameworkManager
      * @return the Android application context of this Robobo application
      */
     public Context getApplicationContext() {
-        return this.androidContext;
+        return this.app.getApplicationContext();
     }
 
+
+    public boolean isStartedUp() {
+        return this.state == FrameworkState.RUNNING;
+    }
 
 
     private void frameworkStateChanged(FrameworkState state) {

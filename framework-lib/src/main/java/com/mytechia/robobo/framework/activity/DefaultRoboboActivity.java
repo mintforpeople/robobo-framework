@@ -24,21 +24,24 @@ package com.mytechia.robobo.framework.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.mytechia.commons.framework.exception.InternalErrorException;
 import com.mytechia.robobo.framework.FrameworkListener;
 import com.mytechia.robobo.framework.FrameworkManager;
 import com.mytechia.robobo.framework.FrameworkState;
 import com.mytechia.robobo.framework.R;
+import com.mytechia.robobo.framework.service.RoboboService;
 
-import java.io.IOException;
 import java.util.Properties;
 
 /** This class provides a skeleton Activity to build new custom Robobo applications.
@@ -59,9 +62,10 @@ import java.util.Properties;
  *   and use the RoboboFramework using FrameworkManager.instantiate()
  *
  */
-public abstract class DefaultRoboboActivity extends Activity implements FrameworkListener {
+public abstract class DefaultRoboboActivity extends Activity {
 
     private FrameworkManager roboboFramework;
+    private boolean frameworkStarted = false;
     private Class displayActivityClass;
     private Properties modulesProperties;
 
@@ -74,6 +78,9 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_default_robobo);
+
+        //start & bind the Robobo service
+        bindRoboboService();
 
         txtStatus = (TextView) findViewById(R.id.txtStatus);
 
@@ -98,8 +105,6 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
                 launchMainActivity();
             }
         });
-
-        new InitRoboboFrameworkTask().execute();
 
     }
 
@@ -192,30 +197,9 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
         @Override
         protected Void doInBackground(Void... params) {
 
-            try {
+            startRoboboApplication();
 
-                initFramework();
-
-                startRoboboApplication();
-
-                launchMainActivity();
-
-            } catch (IOException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showErrorDialog(getText(R.string.error_unable_read_configuration).toString());
-                    }
-                });
-            } catch (InternalErrorException e) {
-                final String errorMsg = e.getMessage();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showErrorDialog(getText(R.string.error_unable_read_configuration).toString() + errorMsg);
-                    }
-                });
-            }
+            launchMainActivity();
 
             return null;
 
@@ -224,46 +208,15 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
     }
 
 
-    /** Initializes the Robobo Framework
-     *
-     * @throws IOException if there was a problem reading module's configuration
-     * @throws InternalErrorException if there was a problem loading some Robobo module
-     */
-    protected void initFramework() throws IOException, InternalErrorException {
+    protected synchronized void frameworkStarted() {
 
-        if (modulesProperties == null) {
-            modulesProperties = new Properties();
-            modulesProperties.load(getApplicationContext().getAssets().open("modules.properties"));
-        }
+        if (!frameworkStarted) {
 
-        this.roboboFramework = FrameworkManager.instantiate(modulesProperties, this);
+            frameworkStarted = true;
 
-        this.roboboFramework.addFrameworkListener(this);
+            //execute custom application
+            new InitRoboboFrameworkTask().execute();
 
-        this.roboboFramework.startup();
-
-    }
-
-
-    @Override
-    public void loadingModule(final String moduleInfo, String moduleVersion) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                txtStatus.setText(getText(R.string.msg_loading_module).toString()+moduleInfo);
-            }
-        });
-    }
-
-    @Override
-    public void moduleLoaded(String moduleInfo, String moduleVersion) {
-
-    }
-
-    @Override
-    public void frameworkStateChanged(FrameworkState state) {
-
-        if (state == FrameworkState.RUNNING) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -271,6 +224,64 @@ public abstract class DefaultRoboboActivity extends Activity implements Framewor
                     btnContinue.setEnabled(true);
                 }
             });
+
         }
+
+    }
+
+
+    protected void bindRoboboService() {
+
+        ServiceConnection connection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+
+                roboboFramework = (FrameworkManager) service;
+
+                roboboFramework.addFrameworkListener(new RoboboListener());
+
+                if (roboboFramework.isStartedUp()) {
+                    frameworkStarted();
+                }
+
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                roboboFramework = null;
+            }
+        };
+
+        Intent intent = new Intent(this, RoboboService.class);
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+
+    }
+
+
+    private class RoboboListener implements FrameworkListener {
+
+        @Override
+        public void loadingModule(final String moduleInfo, String moduleVersion) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    txtStatus.setText(getText(R.string.msg_loading_module).toString() + moduleInfo);
+                }
+            });
+        }
+
+        @Override
+        public void moduleLoaded(String moduleInfo, String moduleVersion) {
+
+        }
+
+        @Override
+        public void frameworkStateChanged(FrameworkState state) {
+
+            if (state == FrameworkState.RUNNING) {
+                frameworkStarted();
+            }
+        }
+
     }
 }
