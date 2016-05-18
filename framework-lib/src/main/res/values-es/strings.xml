@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">Robobo Framework</string>
-    <string name="frameworkVersion">0.1.1</string>
     <string name="msg_loading_module">Cargando módulo:</string>
     <string name="msg_framework_running">Robobo Framework se está ejecutando!</string>
+    <string name="msg_framework_modules_active">Módulos activos:</string>
+    <string name="msg_framework_modules">módulos</string>
     <string name="error_unable_load_module">No se ha podido cargar la clase del módulo:</string>
     <string name="error_unable_read_configuration">No se ha podido cargar la configuración del framework.</string>
     <string name="btn_exit">Salir</string>

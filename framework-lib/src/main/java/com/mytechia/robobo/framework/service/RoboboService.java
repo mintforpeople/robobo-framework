@@ -6,11 +6,13 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.mytechia.commons.framework.exception.InternalErrorException;
 import com.mytechia.robobo.framework.FrameworkListener;
 import com.mytechia.robobo.framework.FrameworkManager;
 import com.mytechia.robobo.framework.FrameworkState;
+import com.mytechia.robobo.framework.R;
 
 import java.io.IOException;
 import java.util.Properties;
@@ -23,7 +25,6 @@ public class RoboboService extends Service implements FrameworkListener {
     private int ROBOBO_NOTIFICATION_ID = 808080;
 
     private NotificationManager mNotificationManager;
-    private Notification.Builder notificationBuilder;
 
     private FrameworkManager roboboManager;
     private boolean roboboManagerIsReady = false;
@@ -43,11 +44,13 @@ public class RoboboService extends Service implements FrameworkListener {
             Properties modules = loadDefaultPropertiesFile();
 
             roboboManager = FrameworkManager.instantiate(modules, getApplication());
+            roboboManager.addFrameworkListener(this);
 
             startUpManagerInThread();
 
         }
         catch(IOException ex) {
+            Log.e("ROBOBO-FRAMEWORK", ex.getMessage());
             showErrorOnNotification("Unable to read modules configuration.");
         }
 
@@ -75,19 +78,21 @@ public class RoboboService extends Service implements FrameworkListener {
                         roboboManager.startup();
 
                 } catch (InternalErrorException e) {
+                    Log.e("ROBOBO-FRAMEWORK", e.getMessage());
                     showErrorOnNotification(e.getMessage());
                 }
 
             }
         });
 
+        t.start();
+
     }
 
 
     private void showServiceNotification() {
 
-        this.notificationBuilder = new Notification.Builder(getApplicationContext())
-                .setContentTitle("Robobo Framework")
+        Notification.Builder notificationBuilder = getBaseNotifiationBuilder()
                 .setContentText("The framework is starting up.");
 
         startForeground(ROBOBO_NOTIFICATION_ID, notificationBuilder.build());
@@ -104,10 +109,18 @@ public class RoboboService extends Service implements FrameworkListener {
 
     private void showOnNotification(String msg) {
 
-        this.notificationBuilder.setContentText(msg);
+        Notification.Builder notificationBuilder = getBaseNotifiationBuilder()
+                .setContentText(msg);
 
         mNotificationManager.notify(ROBOBO_NOTIFICATION_ID, notificationBuilder.build());
 
+    }
+
+
+    private Notification.Builder getBaseNotifiationBuilder() {
+        return new Notification.Builder(getApplicationContext())
+                .setSmallIcon(R.drawable.robobo_logo)
+                .setContentTitle("Robobo Framework");
     }
 
 
@@ -148,7 +161,7 @@ public class RoboboService extends Service implements FrameworkListener {
 
         if (state == FrameworkState.RUNNING) {
             this.roboboManagerIsReady = true;
-
+            showOnNotification("Framework is running.");
         }
 
     }

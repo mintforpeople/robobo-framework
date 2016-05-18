@@ -45,21 +45,8 @@ public class RoboboExampleActivity extends DefaultRoboboActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-
-        //specify the custom set of Robobo modules
-        try {
-            Properties modulesProperties = new Properties();
-            modulesProperties.load(getApplicationContext().getAssets().open("modules.properties"));
-            setModulesProperties(modulesProperties);
-        }
-        catch(IOException ex) {
-            showErrorDialog(getText(R.string.error_unable_read_configuration).toString());
-        }
-
-
         //set the display activity class
         setDisplayActivityClass(RoboboCustomMainActivity.class);
-
 
         super.onCreate(savedInstanceState);
     }

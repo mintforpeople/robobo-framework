@@ -26,6 +26,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Binder;
+import android.util.Log;
 
 import com.mytechia.commons.di.container.IDIContainer;
 import com.mytechia.commons.di.container.PicoContainerWrapper;
@@ -33,6 +34,7 @@ import com.mytechia.commons.framework.exception.InternalErrorException;
 import com.mytechia.robobo.framework.exception.ModuleNotFoundException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Objects;
@@ -139,11 +141,13 @@ public class FrameworkManager extends Binder
                     throw new InternalErrorException(ex);
                 }
 
-                frameworkStateChanged(FrameworkState.ALL_MODULES_LOADED);
-
-                frameworkStateChanged(FrameworkState.RUNNING);
-
             }
+
+            frameworkStateChanged(FrameworkState.ALL_MODULES_LOADED);
+
+            Log.i("ROBOBO-FRAMEWORK", "Robobo started with "+modules.size()+" modules.");
+
+            frameworkStateChanged(FrameworkState.RUNNING);
 
         }
         
@@ -231,12 +235,19 @@ public class FrameworkManager extends Binder
     }
 
 
+    public Collection<IModule> getAllModules() {
+
+        return new ArrayList<>(this.modules);
+
+    }
+
+
     /** Registers a module instance in this manager
      *
      * @param module the module instance
      * @param moduleClass the module class
      */
-    void registerModuleInstance(IModule module, Class moduleClass) {
+    synchronized void registerModuleInstance(IModule module, Class moduleClass) {
         
         if (module == null) return;
         
@@ -252,7 +263,7 @@ public class FrameworkManager extends Binder
      *
      * @param module the module instance to remove
      */
-    void removeModule(IModule module) {
+    synchronized void removeModule(IModule module) {
         
         Objects.requireNonNull(module, "The parameter module is required");
         

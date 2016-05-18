@@ -1,11 +1,13 @@
 <resources>
     <string name="app_name">Robobo Framework</string>
-    <string name="frameworkVersion">0.1.1</string>
+    <string name="frameworkVersion">0.1.2</string>
     <string name="ok_msg">Ok</string>
     <string name="btn_exit">Exit</string>
     <string name="btn_continue">Continue</string>
     <string name="msg_loading_module">Loading module:</string>
     <string name="msg_framework_running">Robobo Framework is running!</string>
+    <string name="msg_framework_modules_active">Modules active:</string>
+    <string name="msg_framework_modules">modules</string>
     <string name="title_error_dialog">Robobo Framework Error</string>
     <string name="error_unable_load_module">Unable to load module class:</string>
     <string name="error_unable_read_configuration">Unable to read Robobo Framework Configuration.</string>

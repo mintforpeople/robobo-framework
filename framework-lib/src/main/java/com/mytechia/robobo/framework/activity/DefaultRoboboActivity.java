@@ -32,6 +32,7 @@ import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -39,9 +40,11 @@ import android.widget.TextView;
 import com.mytechia.robobo.framework.FrameworkListener;
 import com.mytechia.robobo.framework.FrameworkManager;
 import com.mytechia.robobo.framework.FrameworkState;
+import com.mytechia.robobo.framework.IModule;
 import com.mytechia.robobo.framework.R;
 import com.mytechia.robobo.framework.service.RoboboService;
 
+import java.util.Collection;
 import java.util.Properties;
 
 /** This class provides a skeleton Activity to build new custom Robobo applications.
@@ -67,7 +70,6 @@ public abstract class DefaultRoboboActivity extends Activity {
     private FrameworkManager roboboFramework;
     private boolean frameworkStarted = false;
     private Class displayActivityClass;
-    private Properties modulesProperties;
 
     private TextView txtStatus;
     private Button btnContinue;
@@ -83,6 +85,7 @@ public abstract class DefaultRoboboActivity extends Activity {
         bindRoboboService();
 
         txtStatus = (TextView) findViewById(R.id.txtStatus);
+        txtStatus.setMovementMethod(new ScrollingMovementMethod());
 
         /** This button is used to finish and exit the Robobo application
          */
@@ -113,18 +116,6 @@ public abstract class DefaultRoboboActivity extends Activity {
      * to start their custom application code (threads, etc.)
      */
     protected abstract void startRoboboApplication();
-
-
-    /** Sets the properties file used to load a custom set of Robobo modules.
-     * This method should be called in the onCreate() method of custom
-     * applications. If the properties is not set, the framwork will try to start
-     * with a default set of modules.
-     *
-     * @param modulesProperties properties file with the modules configuration
-     */
-    protected void setModulesProperties(Properties modulesProperties) {
-        this.modulesProperties = modulesProperties;
-    }
 
 
     /** Sets the class of the activity that is going to be shown as display for
@@ -189,6 +180,21 @@ public abstract class DefaultRoboboActivity extends Activity {
     }
 
 
+    protected void addToStatusLog(CharSequence msg) {
+
+        final CharSequence localMsg = msg;
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                txtStatus.append(localMsg);
+                txtStatus.append("\n");
+            }
+        });
+
+    }
+
+
     /** Asynchronous task to initialize the Robobo Framework an set up the
      * UI of the application.
      */
@@ -217,14 +223,33 @@ public abstract class DefaultRoboboActivity extends Activity {
             //execute custom application
             new InitRoboboFrameworkTask().execute();
 
+            logStartupStatus();
+
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    txtStatus.setText(getText(R.string.msg_framework_running));
+
                     btnContinue.setEnabled(true);
                 }
             });
 
+        }
+
+    }
+
+    private void logStartupStatus() {
+
+        final Collection<IModule> allModules = roboboFramework.getAllModules();
+
+        addToStatusLog(getText(R.string.msg_framework_running));
+        addToStatusLog("\n");
+        addToStatusLog(getText(R.string.msg_framework_modules_active)+" "+allModules.size());
+
+
+
+
+        for (IModule module : allModules) {
+            addToStatusLog(module.getModuleInfo()+" - "+module.getModuleVersion());
         }
 
     }
@@ -236,12 +261,17 @@ public abstract class DefaultRoboboActivity extends Activity {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
 
-                roboboFramework = (FrameworkManager) service;
+                if (service != null) {
+                    roboboFramework = (FrameworkManager) service;
 
-                roboboFramework.addFrameworkListener(new RoboboListener());
+                    roboboFramework.addFrameworkListener(new RoboboListener());
 
-                if (roboboFramework.isStartedUp()) {
-                    frameworkStarted();
+                    if (roboboFramework.isStartedUp()) {
+                        frameworkStarted();
+                    }
+                }
+                else {
+                    showErrorDialog("Unable to find Robobo service.");
                 }
 
             }
@@ -262,12 +292,7 @@ public abstract class DefaultRoboboActivity extends Activity {
 
         @Override
         public void loadingModule(final String moduleInfo, String moduleVersion) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    txtStatus.setText(getText(R.string.msg_loading_module).toString() + moduleInfo);
-                }
-            });
+
         }
 
         @Override
