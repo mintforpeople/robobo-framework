@@ -37,15 +37,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.mytechia.robobo.framework.FrameworkListener;
-import com.mytechia.robobo.framework.FrameworkManager;
-import com.mytechia.robobo.framework.FrameworkState;
+import com.mytechia.robobo.framework.RoboboManagerListener;
+import com.mytechia.robobo.framework.RoboboManager;
+import com.mytechia.robobo.framework.RoboboManagerState;
 import com.mytechia.robobo.framework.IModule;
 import com.mytechia.robobo.framework.R;
 import com.mytechia.robobo.framework.service.RoboboService;
 
 import java.util.Collection;
-import java.util.Properties;
+
 
 /** This class provides a skeleton Activity to build new custom Robobo applications.
  *
@@ -62,12 +62,12 @@ import java.util.Properties;
  *   a thread with the custom app code by implementing the method startRoboboApplication()
  *
  * - The not so easy way is to implement a custom Android Activity and directly instantiate
- *   and use the RoboboFramework using FrameworkManager.instantiate()
+ *   and use the RoboboFramework using RoboboManager.instantiate()
  *
  */
 public abstract class DefaultRoboboActivity extends Activity {
 
-    private FrameworkManager roboboFramework;
+    private RoboboManager roboboFramework;
     private boolean frameworkStarted = false;
     private Class displayActivityClass;
 
@@ -141,7 +141,7 @@ public abstract class DefaultRoboboActivity extends Activity {
      *
      * @return a reference to the Robobo Framework manager
      */
-    protected FrameworkManager getRoboboFramework() {
+    protected RoboboManager getRoboboFramework() {
         return this.roboboFramework;
     }
 
@@ -245,9 +245,6 @@ public abstract class DefaultRoboboActivity extends Activity {
         addToStatusLog("\n");
         addToStatusLog(getText(R.string.msg_framework_modules_active)+" "+allModules.size());
 
-
-
-
         for (IModule module : allModules) {
             addToStatusLog(module.getModuleInfo()+" - "+module.getModuleVersion());
         }
@@ -255,6 +252,8 @@ public abstract class DefaultRoboboActivity extends Activity {
     }
 
 
+    /** Binds the Robobo service to get a valid instance of the Robobo framework.
+     */
     protected void bindRoboboService() {
 
         ServiceConnection connection = new ServiceConnection() {
@@ -262,10 +261,12 @@ public abstract class DefaultRoboboActivity extends Activity {
             public void onServiceConnected(ComponentName name, IBinder service) {
 
                 if (service != null) {
-                    roboboFramework = (FrameworkManager) service;
+                    roboboFramework = (RoboboManager) service;
 
+                    //it is possible that the framework has not yet finished starting
                     roboboFramework.addFrameworkListener(new RoboboListener());
 
+                    //or mayby it has finished
                     if (roboboFramework.isStartedUp()) {
                         frameworkStarted();
                     }
@@ -288,7 +289,7 @@ public abstract class DefaultRoboboActivity extends Activity {
     }
 
 
-    private class RoboboListener implements FrameworkListener {
+    private class RoboboListener implements RoboboManagerListener {
 
         @Override
         public void loadingModule(final String moduleInfo, String moduleVersion) {
@@ -301,9 +302,10 @@ public abstract class DefaultRoboboActivity extends Activity {
         }
 
         @Override
-        public void frameworkStateChanged(FrameworkState state) {
+        public void frameworkStateChanged(RoboboManagerState state) {
 
-            if (state == FrameworkState.RUNNING) {
+            if (state == RoboboManagerState.RUNNING) {
+                //if the framework has finished starting up
                 frameworkStarted();
             }
         }

@@ -23,7 +23,7 @@
 package com.mytechia.robobo.framework.example.dummy;
 
 import com.mytechia.commons.framework.exception.InternalErrorException;
-import com.mytechia.robobo.framework.FrameworkManager;
+import com.mytechia.robobo.framework.RoboboManager;
 
 import java.util.Properties;
 import java.util.logging.Level;
@@ -75,7 +75,7 @@ public class FrameworkManagerTest {
         modules.put("robobo.module.1", "com.mytechia.robobo.framework.example.dummy.DummyTestModule2");
 
 
-        FrameworkManager frameworkManager = FrameworkManager.instantiate(modules, null);
+        RoboboManager frameworkManager = RoboboManager.instantiate(modules, null);
 
         try {
 

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Robobo Framework</string>
-    <string name="frameworkVersion">0.1.2</string>
-    <string name="ok_msg">Ok</string>
+    <string name="frameworkVersion">0.2.0</string>
+    <string name="ok_msg">OK</string>
     <string name="btn_exit">Exit</string>
     <string name="btn_continue">Continue</string>
     <string name="msg_loading_module">Loading module:</string>

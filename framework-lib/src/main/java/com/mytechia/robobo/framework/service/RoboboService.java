@@ -1,6 +1,27 @@
+/*******************************************************************************
+ *
+ *   Copyright 2016 Mytech Ingenieria Aplicada <http://www.mytechia.com>
+ *   Copyright 2016 Gervasio Varela <gervasio.varela@mytechia.com>
+ *
+ *   This file is part of Robobo Framework Library.
+ *
+ *   Robobo Framework Library is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU Lesser General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   Robobo Framework Library is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU Lesser General Public License for more details.
+ *
+ *   You should have received a copy of the GNU Lesser General Public License
+ *   along with Robobo Framework Library.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+
 package com.mytechia.robobo.framework.service;
 
-import android.app.Application;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -9,31 +30,33 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.mytechia.commons.framework.exception.InternalErrorException;
-import com.mytechia.robobo.framework.FrameworkListener;
-import com.mytechia.robobo.framework.FrameworkManager;
-import com.mytechia.robobo.framework.FrameworkState;
+import com.mytechia.robobo.framework.RoboboManagerListener;
+import com.mytechia.robobo.framework.RoboboManager;
+import com.mytechia.robobo.framework.RoboboManagerState;
 import com.mytechia.robobo.framework.R;
 
 import java.io.IOException;
 import java.util.Properties;
 
-/**
- * Created by gervasio on 16/5/16.
+/** An Android service to start and manage the creation of the Robobo Framework instance.
+ *
+ *
+ * @author Gervasio Varela
  */
-public class RoboboService extends Service implements FrameworkListener {
+public class RoboboService extends Service implements RoboboManagerListener {
 
     private int ROBOBO_NOTIFICATION_ID = 808080;
 
     private NotificationManager mNotificationManager;
 
-    private FrameworkManager roboboManager;
-    private boolean roboboManagerIsReady = false;
+    private RoboboManager roboboManager;
 
 
     @Override
     public void onCreate() {
         super.onCreate();
 
+        //sets the serice as a foreground service with a notification
         mNotificationManager =
                 (NotificationManager) getSystemService(getApplicationContext().NOTIFICATION_SERVICE);
 
@@ -41,11 +64,13 @@ public class RoboboService extends Service implements FrameworkListener {
 
         try {
 
+            //by default it loads the modules from a config file en 'assets'
             Properties modules = loadDefaultPropertiesFile();
 
-            roboboManager = FrameworkManager.instantiate(modules, getApplication());
+            roboboManager = RoboboManager.instantiate(modules, getApplication());
             roboboManager.addFrameworkListener(this);
 
+            //starts the framework manager in a separate thread
             startUpManagerInThread();
 
         }
@@ -57,6 +82,11 @@ public class RoboboService extends Service implements FrameworkListener {
     }
 
 
+    /** Loads the Robobo modules from the default configuration file in 'assets'
+     *
+     * @return the default properties file with the modules configuration
+     * @throws IOException if there was a problem reading the modules configuration file
+     */
     private Properties loadDefaultPropertiesFile() throws IOException {
 
         Properties modulesProperties = new Properties();
@@ -66,6 +96,8 @@ public class RoboboService extends Service implements FrameworkListener {
 
     }
 
+    /** Starts the framework manager in a separate thread.
+     */
     private void startUpManagerInThread() {
 
         Thread t = new Thread(new Runnable() {
@@ -90,9 +122,11 @@ public class RoboboService extends Service implements FrameworkListener {
     }
 
 
+    /** Sets the service as a foreground service and shows a notification
+     */
     private void showServiceNotification() {
 
-        Notification.Builder notificationBuilder = getBaseNotifiationBuilder()
+        Notification.Builder notificationBuilder = getBaseNotificationBuilder()
                 .setContentText("The framework is starting up.");
 
         startForeground(ROBOBO_NOTIFICATION_ID, notificationBuilder.build());
@@ -109,7 +143,7 @@ public class RoboboService extends Service implements FrameworkListener {
 
     private void showOnNotification(String msg) {
 
-        Notification.Builder notificationBuilder = getBaseNotifiationBuilder()
+        Notification.Builder notificationBuilder = getBaseNotificationBuilder()
                 .setContentText(msg);
 
         mNotificationManager.notify(ROBOBO_NOTIFICATION_ID, notificationBuilder.build());
@@ -117,7 +151,11 @@ public class RoboboService extends Service implements FrameworkListener {
     }
 
 
-    private Notification.Builder getBaseNotifiationBuilder() {
+    /** Sets-up the basic configuration of the notifcation (title, etc.)
+     *
+     * @return A Notification.Builder with a title and a logo
+     */
+    private Notification.Builder getBaseNotificationBuilder() {
         return new Notification.Builder(getApplicationContext())
                 .setSmallIcon(R.drawable.robobo_logo)
                 .setContentTitle("Robobo Framework");
@@ -157,10 +195,10 @@ public class RoboboService extends Service implements FrameworkListener {
     }
 
     @Override
-    public void frameworkStateChanged(FrameworkState state) {
+    public void frameworkStateChanged(RoboboManagerState state) {
 
-        if (state == FrameworkState.RUNNING) {
-            this.roboboManagerIsReady = true;
+        if (state == RoboboManagerState.RUNNING) {
+            //when the framework finishes starting-up
             showOnNotification("Framework is running.");
         }
 

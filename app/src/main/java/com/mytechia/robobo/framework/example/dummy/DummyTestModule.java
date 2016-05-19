@@ -24,7 +24,7 @@
 package com.mytechia.robobo.framework.example.dummy;
 
 import com.mytechia.commons.framework.exception.InternalErrorException;
-import com.mytechia.robobo.framework.FrameworkManager;
+import com.mytechia.robobo.framework.RoboboManager;
 import com.mytechia.robobo.framework.IModule;
 
 /**
@@ -42,7 +42,7 @@ public class DummyTestModule implements IModule
     
 
     @Override
-    public void startup(FrameworkManager manager) throws InternalErrorException {
+    public void startup(RoboboManager manager) throws InternalErrorException {
         System.out.println(String.format("Starting up dummy module %d!", id));
     }
 

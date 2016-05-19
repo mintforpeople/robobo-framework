@@ -23,11 +23,11 @@
 package com.mytechia.robobo.framework;
 
 
-/** A listener that receives life-cycle events from the Framework Manager
+/** A listener that receives life-cycle events from the Robobo Manager
  *
  * @author Gervasio Varela
  */
-public interface FrameworkListener {
+public interface RoboboManagerListener {
 
 
     public void loadingModule(String moduleInfo, String moduleVersion);
@@ -35,7 +35,7 @@ public interface FrameworkListener {
     public void moduleLoaded(String moduleInfo, String moduleVersion);
 
 
-    public void frameworkStateChanged(FrameworkState state);
+    public void frameworkStateChanged(RoboboManagerState state);
 
 
 }

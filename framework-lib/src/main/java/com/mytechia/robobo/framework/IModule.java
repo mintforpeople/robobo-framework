@@ -35,7 +35,7 @@ import com.mytechia.commons.framework.exception.InternalErrorException;
  * (threads or whatever) for their operation, but they must free all resources
  * on shutdown.
  * 
- * The modules receives an instance of the FrameworkManager during startup. It
+ * The modules receives an instance of the RoboboManager during startup. It
  * can be used to obtain instances of other modules that are requiered by
  * this module to operate. Modules are started in order, so that a module must be 
  * started after their dependencies.
@@ -50,7 +50,7 @@ public interface IModule
      * @param manager the framework manager can be used to obtains instances of other modules required
      * @throws com.mytechia.commons.framework.exception.InternalErrorException if there was any error during startup
      */
-    public void startup(FrameworkManager manager) throws InternalErrorException;
+    public void startup(RoboboManager manager) throws InternalErrorException;
     
     
     

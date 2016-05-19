@@ -22,11 +22,9 @@
 
 package com.mytechia.robobo.framework;
 
-import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Binder;
-import android.util.Log;
 
 import com.mytechia.commons.di.container.IDIContainer;
 import com.mytechia.commons.di.container.PicoContainerWrapper;
@@ -43,18 +41,18 @@ import java.util.Properties;
 /**
  * Manages the startup and shutdown of Robobo modules
  *
- * The modules can be populated usinga  Properties file like in the example below:
+ * The modules can be populated using a  Properties file like in the example below:
  *
  *      Properties modules = new Properties();
  *      modules.put("robobo.module.0", "com.mytechia.robobo.framework.DummyTestModule1");
  *      modules.put("robobo.module.1", "com.mytechia.robobo.framework.DummyTestModule2");
  *
- *      FrameworkManager frameworkManager = FrameworkManager.instantiate(modules, null);
+ *      RoboboManager frameworkManager = RoboboManager.instantiate(modules, null);
  *
  *
  * @author Gervasio Varela
  */
-public class FrameworkManager extends Binder
+public class RoboboManager extends Binder
 {
 
     private final String MODULE_LOADER_KEY = "robobo.module.%d";
@@ -69,12 +67,12 @@ public class FrameworkManager extends Binder
     
     private int modulesIndex = 0;
 
-    private FrameworkState state = FrameworkState.CREATED;
+    private RoboboManagerState state = RoboboManagerState.CREATED;
 
-    private final ArrayList<FrameworkListener> listeners;
+    private final ArrayList<RoboboManagerListener> listeners;
 
 
-    private static FrameworkManager _instance = null;
+    private static RoboboManager _instance = null;
 
 
     /**
@@ -82,7 +80,7 @@ public class FrameworkManager extends Binder
      * @param modulesFile
      * @param app
      */
-    private FrameworkManager(Properties modulesFile, Application app) {
+    private RoboboManager(Properties modulesFile, Application app) {
         this.modulesFile = modulesFile;
         this.app = app;
         this.modules = new LinkedList<>();
@@ -96,19 +94,19 @@ public class FrameworkManager extends Binder
      *
      * @param modulesFile a properties file with the modules to load
      * @param app the Robobo Android application
-     * @return a new instance of FrameworkManager
+     * @return a new instance of RoboboManager
      */
-    public static final FrameworkManager instantiate(Properties modulesFile, Application app) {
-        _instance = new FrameworkManager(modulesFile, app);
+    public static final RoboboManager instantiate(Properties modulesFile, Application app) {
+        _instance = new RoboboManager(modulesFile, app);
         return _instance;
     }
 
 
-    /** Returns the current singleton instance of the FrameworkManager
+    /** Returns the current singleton instance of the RoboboManager
      *
      * @return the current singleton instance of the FrameworkMangaer
      */
-    public static final FrameworkManager getInstance() {
+    public static final RoboboManager getInstance() {
         return _instance;
     }
 
@@ -119,7 +117,7 @@ public class FrameworkManager extends Binder
      */
     public void startup() throws InternalErrorException {
 
-        if (state == FrameworkState.CREATED) {
+        if (state == RoboboManagerState.CREATED) {
 
             while (isNextModule()) {
 
@@ -143,11 +141,9 @@ public class FrameworkManager extends Binder
 
             }
 
-            frameworkStateChanged(FrameworkState.ALL_MODULES_LOADED);
+            frameworkStateChanged(RoboboManagerState.ALL_MODULES_LOADED);
 
-            Log.i("ROBOBO-FRAMEWORK", "Robobo started with "+modules.size()+" modules.");
-
-            frameworkStateChanged(FrameworkState.RUNNING);
+            frameworkStateChanged(RoboboManagerState.RUNNING);
 
         }
         
@@ -283,15 +279,15 @@ public class FrameworkManager extends Binder
 
 
     public boolean isStartedUp() {
-        return this.state == FrameworkState.RUNNING;
+        return this.state == RoboboManagerState.RUNNING;
     }
 
 
-    private void frameworkStateChanged(FrameworkState state) {
+    private void frameworkStateChanged(RoboboManagerState state) {
 
         this.state = state;
 
-        for(FrameworkListener listener : this.listeners) {
+        for(RoboboManagerListener listener : this.listeners) {
             listener.frameworkStateChanged(state);
         }
 
@@ -303,7 +299,7 @@ public class FrameworkManager extends Binder
         String moduleInfo = module.getModuleInfo();
         String moduleVersion = module.getModuleVersion();
 
-        for(FrameworkListener listener : this.listeners) {
+        for(RoboboManagerListener listener : this.listeners) {
             listener.loadingModule(moduleInfo, moduleVersion);
         }
 
@@ -314,18 +310,18 @@ public class FrameworkManager extends Binder
         String moduleInfo = module.getModuleInfo();
         String moduleVersion = module.getModuleVersion();
 
-        for(FrameworkListener listener : this.listeners) {
+        for(RoboboManagerListener listener : this.listeners) {
             listener.moduleLoaded(moduleInfo, moduleVersion);
         }
 
     }
 
 
-    public void addFrameworkListener(FrameworkListener listener) {
+    public void addFrameworkListener(RoboboManagerListener listener) {
         this.listeners.add(listener);
     }
 
-    public void removeFrameworkListener(FrameworkListener listener) {
+    public void removeFrameworkListener(RoboboManagerListener listener) {
         this.listeners.remove(listener);
     }
 

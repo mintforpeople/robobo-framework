@@ -22,10 +22,10 @@
 
 package com.mytechia.robobo.framework;
 
-/** States of the lifecycle of the FrameworkManager
+/** States of the lifecycle of the RoboboManager
  * @author Gervasio Varela
  */
-public enum FrameworkState {
+public enum RoboboManagerState {
 
     CREATED,
     STARTING,

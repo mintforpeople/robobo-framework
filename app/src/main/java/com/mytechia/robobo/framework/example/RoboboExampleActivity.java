@@ -23,13 +23,10 @@ package com.mytechia.robobo.framework.example;
 
 import android.os.Bundle;
 
-import com.mytechia.robobo.framework.FrameworkManager;
+import com.mytechia.robobo.framework.RoboboManager;
 import com.mytechia.robobo.framework.activity.DefaultRoboboActivity;
 import com.mytechia.robobo.framework.example.dummy.DummyTestModule1;
 import com.mytechia.robobo.framework.exception.ModuleNotFoundException;
-
-import java.io.IOException;
-import java.util.Properties;
 
 
 /** An example of how to use DefaultRoboboActivity to easily build a new
@@ -45,7 +42,7 @@ public class RoboboExampleActivity extends DefaultRoboboActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        //set the display activity class
+        //sets the display activity class
         setDisplayActivityClass(RoboboCustomMainActivity.class);
 
         super.onCreate(savedInstanceState);
@@ -64,10 +61,10 @@ public class RoboboExampleActivity extends DefaultRoboboActivity {
 
     private class RoboboApp implements Runnable {
 
-        private FrameworkManager roboboManager;
+        private RoboboManager roboboManager;
         private DummyTestModule1 roboboModule1;
 
-        public RoboboApp(FrameworkManager roboboManager) {
+        public RoboboApp(RoboboManager roboboManager) {
             this.roboboManager = roboboManager;
 
             try {
