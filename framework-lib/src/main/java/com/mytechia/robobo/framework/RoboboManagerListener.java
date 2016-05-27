@@ -38,4 +38,7 @@ public interface RoboboManagerListener {
     public void frameworkStateChanged(RoboboManagerState state);
 
 
+    public void frameworkError(Exception ex);
+
+
 }

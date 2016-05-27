@@ -26,6 +26,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 
 import com.mytechia.robobo.framework.RoboboManager;
@@ -60,7 +61,7 @@ public class RoboboServiceHelper {
      * Then the manager has finished loading all the modules, the Listener
      * interface is used to notify the instance of the Robobo Manager.
      */
-    public void bindRoboboService() {
+    public void bindRoboboService(Bundle roboboOptions) {
 
         connection = new ServiceConnection() {
             @Override
@@ -90,6 +91,7 @@ public class RoboboServiceHelper {
         };
 
         Intent intent = new Intent(activity, RoboboService.class);
+        intent.putExtras(roboboOptions);
         activity.bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
     }
@@ -143,9 +145,13 @@ public class RoboboServiceHelper {
                 //if the framework has finished starting up
                 frameworkStarted();
             }
-            else if (state == RoboboManagerState.ERROR) {
-                listener.onError("Unable to start the Robobo Manager.");
-            }
+
+        }
+
+
+        @Override
+        public void frameworkError(Exception ex) {
+            listener.onError(ex.getMessage());
         }
 
     }

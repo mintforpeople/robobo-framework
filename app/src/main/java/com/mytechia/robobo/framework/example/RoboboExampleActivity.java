@@ -60,11 +60,12 @@ public class RoboboExampleActivity extends Activity {
             }
 
             @Override
-            public void onError(String errorMsg) {
-
-            }
+            public void onError(String errorMsg) {}
         });
-        roboboHelper.bindRoboboService();
+
+        Bundle roboboOptions = new Bundle();
+        roboboOptions.putString("robobo.name", "HC-06");
+        roboboHelper.bindRoboboService(roboboOptions);
 
     }
 
@@ -73,6 +74,8 @@ public class RoboboExampleActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         roboboHelper.unbindRoboboService();
+        finish();
+        System.exit(0);
     }
 
 

@@ -75,7 +75,7 @@ public class FrameworkManagerTest {
         modules.put("robobo.module.1", "com.mytechia.robobo.framework.example.dummy.DummyTestModule2");
 
 
-        RoboboManager frameworkManager = RoboboManager.instantiate(modules, null);
+        RoboboManager frameworkManager = RoboboManager.instantiate(modules, null, null);
 
         try {
 

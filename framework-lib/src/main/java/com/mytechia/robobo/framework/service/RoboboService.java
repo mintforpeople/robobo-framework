@@ -26,6 +26,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -62,13 +63,18 @@ public class RoboboService extends Service implements RoboboManagerListener {
 
         showServiceNotification();
 
+    }
+
+
+    private void launchRoboboManager(Bundle roboboOptions) {
+
         try {
 
             //by default it loads the modules from a config file en 'assets'
             Properties modules = loadDefaultPropertiesFile();
 
-            roboboManager = RoboboManager.instantiate(modules, getApplication());
-            roboboManager.addFrameworkListener(this);
+            this.roboboManager = RoboboManager.instantiate(modules, roboboOptions, getApplication());
+            this.roboboManager.addFrameworkListener(this);
 
             //starts the framework manager in a separate thread
             startUpManagerInThread();
@@ -177,8 +183,22 @@ public class RoboboService extends Service implements RoboboManagerListener {
 
     }
 
+
+    private Bundle getRoboboOptions(Intent intent) {
+        Bundle roboboOptions = intent.getExtras();
+        if (roboboOptions == null) {
+            roboboOptions = new Bundle();
+        }
+        return roboboOptions;
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
+
+        if (this.roboboManager == null) {
+            //if the framework has not been started up yet (nobody has binded yet)
+            launchRoboboManager(getRoboboOptions(intent));
+        }
 
         return this.roboboManager;
 
@@ -203,4 +223,12 @@ public class RoboboService extends Service implements RoboboManagerListener {
         }
 
     }
+
+    @Override
+    public void frameworkError(Exception ex) {
+        showErrorOnNotification(ex.getMessage());
+    }
+
+
+
 }
