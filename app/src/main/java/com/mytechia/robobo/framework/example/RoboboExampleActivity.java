@@ -21,41 +21,58 @@
  ******************************************************************************/
 package com.mytechia.robobo.framework.example;
 
+import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.mytechia.robobo.framework.RoboboManager;
-import com.mytechia.robobo.framework.activity.DefaultRoboboActivity;
 import com.mytechia.robobo.framework.example.dummy.DummyTestModule1;
 import com.mytechia.robobo.framework.exception.ModuleNotFoundException;
+import com.mytechia.robobo.framework.service.RoboboServiceHelper;
 
 
 /** An example of how to use DefaultRoboboActivity to easily build a new
  * custom Robobo Application.
  *
- * 1st it overrides onCreate() to sets the Display Activity for this application.
+ * 1st it uses the RoboboServiceHelper to start the RoboboManager and obtain an instance of it
  * 2nd it implements the custom robobo application code in a Runnable object.
- * 3rd it implements startRoboboApplication() to initialize the custom application code thread.
+ * 3rd it starts the thread when the Robobo Manager has finished starting up all modules
  *
  */
-public class RoboboExampleActivity extends DefaultRoboboActivity {
+public class RoboboExampleActivity extends Activity {
+
+    private RoboboServiceHelper roboboHelper;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        //sets the display activity class
-        setDisplayActivityClass(RoboboCustomMainActivity.class);
-
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_robobo_custom_main);
+
+        roboboHelper = new RoboboServiceHelper(this, new RoboboServiceHelper.Listener() {
+            @Override
+            public void onRoboboManagerStarted(RoboboManager roboboManager) {
+
+                RoboboApp app = new RoboboApp(roboboManager);
+                Thread t = new Thread(app);
+                t.start();
+
+            }
+
+            @Override
+            public void onError(String errorMsg) {
+
+            }
+        });
+        roboboHelper.bindRoboboService();
+
     }
 
 
     @Override
-    protected void startRoboboApplication() {
-
-        //start the application code in a new thread
-        Thread t = new Thread(new RoboboApp(getRoboboFramework()));
-        t.start();
-
+    protected void onDestroy() {
+        super.onDestroy();
+        roboboHelper.unbindRoboboService();
     }
 
 
@@ -71,7 +88,7 @@ public class RoboboExampleActivity extends DefaultRoboboActivity {
                 roboboModule1 = this.roboboManager.getModuleInstance(DummyTestModule1.class);
             }
             catch(ModuleNotFoundException ex) {
-                showErrorDialog("Module not found: "+ex.getMessage());
+                Log.e("ROBOBO-APP", "Module not found: "+ex.getMessage());
             }
 
 

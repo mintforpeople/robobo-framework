@@ -56,7 +56,7 @@ public class RoboboService extends Service implements RoboboManagerListener {
     public void onCreate() {
         super.onCreate();
 
-        //sets the serice as a foreground service with a notification
+        //sets the service as a foreground service with a notification
         mNotificationManager =
                 (NotificationManager) getSystemService(getApplicationContext().NOTIFICATION_SERVICE);
 
@@ -151,7 +151,7 @@ public class RoboboService extends Service implements RoboboManagerListener {
     }
 
 
-    /** Sets-up the basic configuration of the notifcation (title, etc.)
+    /** Sets-up the basic configuration of the notification (title, etc.)
      *
      * @return A Notification.Builder with a title and a logo
      */

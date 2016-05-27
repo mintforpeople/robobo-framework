@@ -25,6 +25,7 @@ package com.mytechia.robobo.framework;
 import android.app.Application;
 import android.content.Context;
 import android.os.Binder;
+import android.util.Log;
 
 import com.mytechia.commons.di.container.IDIContainer;
 import com.mytechia.commons.di.container.PicoContainerWrapper;
@@ -37,6 +38,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Properties;
+
 
 /**
  * Manages the startup and shutdown of Robobo modules
@@ -54,6 +56,7 @@ import java.util.Properties;
  */
 public class RoboboManager extends Binder
 {
+
 
     private final String MODULE_LOADER_KEY = "robobo.module.%d";
 
@@ -102,15 +105,6 @@ public class RoboboManager extends Binder
     }
 
 
-    /** Returns the current singleton instance of the RoboboManager
-     *
-     * @return the current singleton instance of the FrameworkMangaer
-     */
-    public static final RoboboManager getInstance() {
-        return _instance;
-    }
-
-
     /** Starts the framework and the configured Robobo modules.
      *
      * @throws InternalErrorException if there was an error while loading the modules
@@ -118,6 +112,8 @@ public class RoboboManager extends Binder
     public void startup() throws InternalErrorException {
 
         if (state == RoboboManagerState.CREATED) {
+
+            Log.i("ROBOBO-MANAGER", "Starting down Robobo Manager.");
 
             while (isNextModule()) {
 
@@ -132,11 +128,17 @@ public class RoboboManager extends Binder
                     notifyModuleLoaded(module);
 
                 } catch (ClassNotFoundException ex) {
+                    frameworkStateChanged(RoboboManagerState.ERROR);
                     throw new InternalErrorException(ex.getMessage());
                 } catch (InstantiationException ex) {
+                    frameworkStateChanged(RoboboManagerState.ERROR);
                     throw new InternalErrorException(ex);
                 } catch (IllegalAccessException ex) {
+                    frameworkStateChanged(RoboboManagerState.ERROR);
                     throw new InternalErrorException(ex);
+                } catch (InternalErrorException ex) {
+                    frameworkStateChanged(RoboboManagerState.ERROR);
+                    throw ex;
                 }
 
             }
@@ -155,7 +157,10 @@ public class RoboboManager extends Binder
      * @throws InternalErrorException if there was an error while shutting down the modules
      */
     public void shutdown() throws InternalErrorException {
-    
+
+
+        Log.i("ROBOBO-MANAGER", "Shutting down Robobo Manager.");
+
         Iterator<IModule> modulesIterator = this.modules.descendingIterator();
         
         while(modulesIterator.hasNext()) {
@@ -302,6 +307,8 @@ public class RoboboManager extends Binder
         for(RoboboManagerListener listener : this.listeners) {
             listener.loadingModule(moduleInfo, moduleVersion);
         }
+
+        Log.d("ROBOBO-MANAGER", "Loading module: "+moduleInfo+" - "+moduleVersion);
 
     }
 

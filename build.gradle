@@ -8,6 +8,7 @@ def isReleaseBuild() {
 
 buildscript {
     repositories {
+        mavenLocal()
         mavenCentral()
     }
     dependencies {
@@ -25,9 +26,7 @@ allprojects {
     group = GROUP
 
     repositories {
-        maven {
-            url "http://bizancio:7080/nexus/content/repositories/snapshots/"
-        }
+        mavenLocal()
         mavenCentral()
     }
 }
