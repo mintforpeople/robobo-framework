@@ -142,9 +142,6 @@ public class RoboboManager extends Binder
                     frameworkError(ex);
                     throw ex;
                 }
-                finally {
-                    this.shutdown();
-                }
 
             }
 

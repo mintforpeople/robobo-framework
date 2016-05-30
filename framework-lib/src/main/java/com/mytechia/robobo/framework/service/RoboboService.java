@@ -116,14 +116,30 @@ public class RoboboService extends Service implements RoboboManagerListener {
                         roboboManager.startup();
 
                 } catch (InternalErrorException e) {
-                    Log.e("ROBOBO-FRAMEWORK", e.getMessage());
-                    showErrorOnNotification(e.getMessage());
+                    roboboManagerStatupError(e);
                 }
 
             }
         });
 
         t.start();
+
+    }
+
+
+    private void roboboManagerStatupError(InternalErrorException ex) {
+
+        if (roboboManager != null) {
+            try {
+
+                roboboManager.shutdown();
+
+            } catch (InternalErrorException e1) {
+                Log.e("ROBOBO-FRAMEWORK", e1.getMessage());
+            }
+        }
+
+        showErrorOnNotification(ex.getMessage());
 
     }
 

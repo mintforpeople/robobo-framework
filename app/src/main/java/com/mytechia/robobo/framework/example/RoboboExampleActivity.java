@@ -75,7 +75,6 @@ public class RoboboExampleActivity extends Activity {
         super.onDestroy();
         roboboHelper.unbindRoboboService();
         finish();
-        System.exit(0);
     }
 
 
