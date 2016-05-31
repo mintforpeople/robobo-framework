@@ -91,6 +91,7 @@ public class RoboboServiceHelper {
         };
 
         Intent intent = new Intent(activity, RoboboService.class);
+        if (roboboOptions == null) roboboOptions = new Bundle();
         intent.putExtras(roboboOptions);
         activity.bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
