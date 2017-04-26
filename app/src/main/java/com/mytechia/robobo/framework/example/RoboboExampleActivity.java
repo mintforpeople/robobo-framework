@@ -22,6 +22,7 @@
 package com.mytechia.robobo.framework.example;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -29,6 +30,8 @@ import com.mytechia.robobo.framework.RoboboManager;
 import com.mytechia.robobo.framework.example.dummy.DummyTestModule1;
 import com.mytechia.robobo.framework.exception.ModuleNotFoundException;
 import com.mytechia.robobo.framework.service.RoboboServiceHelper;
+
+import java.io.FileOutputStream;
 
 
 /** An example of how to use DefaultRoboboActivity to easily build a new
@@ -85,6 +88,17 @@ public class RoboboExampleActivity extends Activity {
 
         public RoboboApp(RoboboManager roboboManager) {
             this.roboboManager = roboboManager;
+            //Initializing log file
+            String string = "";
+            FileOutputStream outputStream;
+
+            try {
+                outputStream = openFileOutput("log.txt", Context.MODE_PRIVATE);
+                outputStream.write(string.getBytes());
+                outputStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             try {
                 roboboModule1 = this.roboboManager.getModuleInstance(DummyTestModule1.class);

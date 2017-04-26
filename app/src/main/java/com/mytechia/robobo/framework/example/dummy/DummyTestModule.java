@@ -37,6 +37,7 @@ public class DummyTestModule implements IModule
 {
     
     private final int id;
+    private RoboboManager m;
     
     public DummyTestModule(int id) {
         this.id = id;
@@ -46,12 +47,14 @@ public class DummyTestModule implements IModule
     @Override
     public void startup(RoboboManager manager) throws InternalErrorException {
         System.out.println(String.format("Starting up dummy module %d!", id));
-        Log.i("DUMMY-MODULE", "Robobo name = "+manager.getOptions().getString("robobo.name"));
+        m = manager;
+        m.log(this.getClass().getSimpleName(), String.format("Starting up dummy module %d!", id));
     }
 
     @Override
     public void shutdown() throws InternalErrorException {
-        System.out.println(String.format("Shutting down dummy module %d!", id));
+        m.log(this.getClass().getSimpleName(), String.format("Shutting down dummy module %d!", id));
+
     }
 
     @Override

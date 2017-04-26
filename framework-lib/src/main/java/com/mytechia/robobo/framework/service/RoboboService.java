@@ -57,11 +57,8 @@ public class RoboboService extends Service implements RoboboManagerListener {
     public void onCreate() {
         super.onCreate();
 
-        //sets the service as a foreground service with a notification
-        mNotificationManager =
-                (NotificationManager) getSystemService(getApplicationContext().NOTIFICATION_SERVICE);
 
-        showServiceNotification();
+
 
     }
 
@@ -82,7 +79,7 @@ public class RoboboService extends Service implements RoboboManagerListener {
         }
         catch(IOException ex) {
             Log.e("ROBOBO-FRAMEWORK", ex.getMessage());
-            showErrorOnNotification("Unable to read modules configuration.");
+
         }
 
     }
@@ -139,38 +136,12 @@ public class RoboboService extends Service implements RoboboManagerListener {
             }
         }
 
-        showErrorOnNotification(ex.getMessage());
+
 
     }
 
 
-    /** Sets the service as a foreground service and shows a notification
-     */
-    private void showServiceNotification() {
 
-        Notification.Builder notificationBuilder = getBaseNotificationBuilder()
-                .setContentText("The framework is starting up.");
-
-        startForeground(ROBOBO_NOTIFICATION_ID, notificationBuilder.build());
-
-    }
-
-
-    private void showErrorOnNotification(String errorMsg) {
-
-        showOnNotification("ERROR: " + errorMsg);
-
-    }
-
-
-    private void showOnNotification(String msg) {
-
-        Notification.Builder notificationBuilder = getBaseNotificationBuilder()
-                .setContentText(msg);
-
-        mNotificationManager.notify(ROBOBO_NOTIFICATION_ID, notificationBuilder.build());
-
-    }
 
 
     /** Sets-up the basic configuration of the notification (title, etc.)
@@ -194,7 +165,7 @@ public class RoboboService extends Service implements RoboboManagerListener {
                 roboboManager.shutdown();
 
         } catch (InternalErrorException e) {
-            showErrorOnNotification(e.getMessage());
+
         }
 
     }
@@ -233,16 +204,13 @@ public class RoboboService extends Service implements RoboboManagerListener {
     @Override
     public void frameworkStateChanged(RoboboManagerState state) {
 
-        if (state == RoboboManagerState.RUNNING) {
-            //when the framework finishes starting-up
-            showOnNotification("Framework is running.");
-        }
+
 
     }
 
     @Override
     public void frameworkError(Exception ex) {
-        showErrorOnNotification(ex.getMessage());
+
     }
 
 
