@@ -38,6 +38,12 @@ import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.core.util.StatusPrinter;
+
 /**
  * Manages the startup and shutdown of Robobo modules
  *
@@ -75,12 +81,18 @@ public class RoboboManager extends Binder
     private static RoboboManager _instance = null;
 
 
+    private Logger log;
+
     /**
      *
      * @param modulesFile
      * @param app
      */
     private RoboboManager(Properties modulesFile, Application app) {
+        log = LoggerFactory.getLogger("com.mytechia.robobo.framework");
+        log.info("Starting Robobo Framework");
+        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+        StatusPrinter.print(lc);
         this.modulesFile = modulesFile;
         this.app = app;
         this.modules = new LinkedList<>();
@@ -116,6 +128,7 @@ public class RoboboManager extends Binder
      * @throws InternalErrorException if there was an error while loading the modules
      */
     public void startup() throws InternalErrorException {
+
 
         if (state == RoboboManagerState.CREATED) {
 
@@ -172,6 +185,10 @@ public class RoboboManager extends Binder
             this.diContainer.unregister(module.getClass());
             modulesIterator.remove();
         }
+
+        //Stops the logging system
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        loggerContext.stop();
         
     }
     
@@ -323,6 +340,60 @@ public class RoboboManager extends Binder
 
     public void removeFrameworkListener(RoboboManagerListener listener) {
         this.listeners.remove(listener);
+    }
+//
+//    public void Log(String message){
+//        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+//        String classname =stackTraceElements[3].getClassName();
+//        message = classname.substring(classname.lastIndexOf('.') + 1)+": "+message;
+//
+//        log.debug(message);
+//
+//    }
+
+    /**
+     * Logs a message with a tag and Debug log level,
+     * can be configured via logback.xml in thye assets folder of the app
+     * @param tag Tag of the message
+     * @param message Body of the message
+     */
+    public void log(String tag, String message){
+        message = tag+": "+message;
+
+        log.debug(message);
+
+    }
+
+    /**
+     * Logs a message with a tag and a user defined log level,
+     * can be configured via logback.xml in thye assets folder of the app
+     * @param tag Tag of the message
+     * @param message Body of the message
+     */
+    public void log(LogLvl logLevel, String tag, String message){
+
+        message = tag+": "+message;
+        switch (logLevel){
+            case DEBUG:
+                log.debug(message);
+                break;
+
+            case INFO:
+                log.info(message);
+                break;
+
+            case WARNING:
+                log.warn(message);
+                break;
+
+            case ERROR:
+                log.error(message);
+                break;
+
+            case TRACE:
+                log.trace(message);
+                break;
+        }
     }
 
 }

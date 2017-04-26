@@ -60,7 +60,7 @@ public class RoboboService extends Service implements RoboboManagerListener {
         mNotificationManager =
                 (NotificationManager) getSystemService(getApplicationContext().NOTIFICATION_SERVICE);
 
-        showServiceNotification();
+        //showServiceNotification();
 
         try {
 
@@ -76,7 +76,6 @@ public class RoboboService extends Service implements RoboboManagerListener {
         }
         catch(IOException ex) {
             Log.e("ROBOBO-FRAMEWORK", ex.getMessage());
-            showErrorOnNotification("Unable to read modules configuration.");
         }
 
     }
@@ -111,7 +110,6 @@ public class RoboboService extends Service implements RoboboManagerListener {
 
                 } catch (InternalErrorException e) {
                     Log.e("ROBOBO-FRAMEWORK", e.getMessage());
-                    showErrorOnNotification(e.getMessage());
                 }
 
             }
@@ -172,7 +170,6 @@ public class RoboboService extends Service implements RoboboManagerListener {
                 roboboManager.shutdown();
 
         } catch (InternalErrorException e) {
-            showErrorOnNotification(e.getMessage());
         }
 
     }
@@ -197,10 +194,7 @@ public class RoboboService extends Service implements RoboboManagerListener {
     @Override
     public void frameworkStateChanged(RoboboManagerState state) {
 
-        if (state == RoboboManagerState.RUNNING) {
-            //when the framework finishes starting-up
-            showOnNotification("Framework is running.");
-        }
+
 
     }
 }

@@ -21,12 +21,20 @@
  ******************************************************************************/
 package com.mytechia.robobo.framework.example;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import com.mytechia.robobo.framework.RoboboManager;
 import com.mytechia.robobo.framework.activity.DefaultRoboboActivity;
 import com.mytechia.robobo.framework.example.dummy.DummyTestModule1;
 import com.mytechia.robobo.framework.exception.ModuleNotFoundException;
+
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileOutputStream;
+
+import ch.qos.logback.classic.LoggerContext;
 
 
 /** An example of how to use DefaultRoboboActivity to easily build a new
@@ -44,10 +52,18 @@ public class RoboboExampleActivity extends DefaultRoboboActivity {
 
         //sets the display activity class
         setDisplayActivityClass(RoboboCustomMainActivity.class);
+        System.out.println(getExternalFilesDir(null));
+        System.out.println(getExternalCacheDir());
+
 
         super.onCreate(savedInstanceState);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+    }
 
     @Override
     protected void startRoboboApplication() {
@@ -65,6 +81,18 @@ public class RoboboExampleActivity extends DefaultRoboboActivity {
         private DummyTestModule1 roboboModule1;
 
         public RoboboApp(RoboboManager roboboManager) {
+            //Initializing log file
+            String string = "";
+            FileOutputStream outputStream;
+
+            try {
+                outputStream = openFileOutput("log.txt", Context.MODE_PRIVATE);
+                outputStream.write(string.getBytes());
+                outputStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             this.roboboManager = roboboManager;
 
             try {
@@ -93,10 +121,12 @@ public class RoboboExampleActivity extends DefaultRoboboActivity {
                 }
             **************************************************/
 
-            System.out.println("Doing something usefull with the Robobo modules!");
+            System.out.println("Doing something useful with the Robobo modules!");
             System.out.println("Robobo module = "+this.roboboModule1.getModuleVersion());
 
         }
+
+
 
     }
 
