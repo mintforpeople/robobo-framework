@@ -26,6 +26,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.mytechia.robobo.framework.LogLvl;
 import com.mytechia.robobo.framework.RoboboManager;
 import com.mytechia.robobo.framework.example.dummy.DummyTestModule1;
 import com.mytechia.robobo.framework.exception.ModuleNotFoundException;
@@ -104,7 +105,7 @@ public class RoboboExampleActivity extends Activity {
                 roboboModule1 = this.roboboManager.getModuleInstance(DummyTestModule1.class);
             }
             catch(ModuleNotFoundException ex) {
-                Log.e("ROBOBO-APP", "Module not found: "+ex.getMessage());
+                this.roboboManager.log(LogLvl.ERROR,"ROBOBO-APP", "Module not found: "+ex.getMessage());
             }
 
 
@@ -126,8 +127,8 @@ public class RoboboExampleActivity extends Activity {
                 }
             **************************************************/
 
-            System.out.println("Doing something usefull with the Robobo modules!");
-            System.out.println("Robobo module = "+this.roboboModule1.getModuleVersion());
+            this.roboboManager.log("ROBOBO-APP","Doing something usefull with the Robobo modules!");
+            this.roboboManager.log("ROBOBO-APP","Robobo module = "+this.roboboModule1.getModuleVersion());
 
         }
 

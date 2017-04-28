@@ -46,10 +46,6 @@ import java.util.Properties;
  */
 public class RoboboService extends Service implements RoboboManagerListener {
 
-    private int ROBOBO_NOTIFICATION_ID = 808080;
-
-    private NotificationManager mNotificationManager;
-
     private RoboboManager roboboManager;
 
 

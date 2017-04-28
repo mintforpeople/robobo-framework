@@ -2,6 +2,7 @@
  *
  *   Copyright 2016 Mytech Ingenieria Aplicada <http://www.mytechia.com>
  *   Copyright 2016 Gervasio Varela <gervasio.varela@mytechia.com>
+ *   Copyright 2017 Luis Llamas <luis.llamas@mytechia.com>
  *
  *   This file is part of Robobo Framework Library.
  *
@@ -24,6 +25,7 @@ package com.mytechia.robobo.framework;
 
 import android.app.Application;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.util.Log;
@@ -44,6 +46,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.util.ContextInitializer;
+import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.StatusPrinter;
 
 
@@ -85,6 +89,7 @@ public class RoboboManager extends Binder
     private static RoboboManager _instance = null;
 
     private Logger log;
+    LoggerContext lc;
 
 
 
@@ -95,10 +100,18 @@ public class RoboboManager extends Binder
         this.modules = new LinkedList<>();
         this.diContainer = new PicoContainerWrapper();
         this.listeners = new ArrayList<>(2);
+
+
+        lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+        StatusPrinter.print(lc);
         log = LoggerFactory.getLogger("com.mytechia.robobo.framework");
         log.info("Starting Robobo Framework");
-        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-        StatusPrinter.print(lc);
+
+
+
+
+
+
     }
 
 
@@ -124,7 +137,7 @@ public class RoboboManager extends Binder
 
         if (state == RoboboManagerState.CREATED) {
 
-            Log.i("ROBOBO-MANAGER", "Starting up Robobo Manager.");
+            log(LogLvl.INFO,"ROBOBO-MANAGER", "Starting up Robobo Manager.");
 
             while (isNextModule()) {
 
@@ -173,7 +186,7 @@ public class RoboboManager extends Binder
     public void shutdown() throws InternalErrorException {
 
 
-        Log.i("ROBOBO-MANAGER", "Shutting down Robobo Manager.");
+        log(LogLvl.INFO,"ROBOBO-MANAGER", "Shutting down Robobo Manager.");
 
         Iterator<IModule> modulesIterator = this.modules.descendingIterator();
         
@@ -245,7 +258,7 @@ public class RoboboManager extends Binder
      */
     public <T> T getModuleInstance(Class<T> moduleClass) throws ModuleNotFoundException {
         
-        Objects.requireNonNull(moduleClass, "The parameter clazz is required");
+        Objects.requireNonNull(moduleClass, "The parameter class is required");
 
         T module = this.diContainer.getInstance(moduleClass);
 
@@ -275,7 +288,7 @@ public class RoboboManager extends Binder
         
         if (module == null) return;
         
-        Objects.requireNonNull(moduleClass, "The parameter clazz is required");
+        Objects.requireNonNull(moduleClass, "The parameter class is required");
         
         this.diContainer.registerSingleton(moduleClass, module);
         this.modules.add(module);
@@ -323,7 +336,7 @@ public class RoboboManager extends Binder
 
     private void frameworkError(Exception ex) {
 
-        Log.e("ROBOBO-MANAGER", ex.getMessage());
+        log(LogLvl.ERROR,"ROBOBO-MANAGER", ex.getMessage());
 
         frameworkStateChanged(RoboboManagerState.ERROR);
 
@@ -343,7 +356,7 @@ public class RoboboManager extends Binder
             listener.loadingModule(moduleInfo, moduleVersion);
         }
 
-        Log.d("ROBOBO-MANAGER", "Loading module: "+moduleInfo+" - "+moduleVersion);
+        log("ROBOBO-MANAGER", "Loading module: "+moduleInfo+" - "+moduleVersion);
 
     }
 
@@ -367,15 +380,6 @@ public class RoboboManager extends Binder
         this.listeners.remove(listener);
     }
 
-    //
-//    public void Log(String message){
-//        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-//        String classname =stackTraceElements[3].getClassName();
-//        message = classname.substring(classname.lastIndexOf('.') + 1)+": "+message;
-//
-//        log.debug(message);
-//
-//    }
 
     /**
      * Logs a message with a tag and Debug log level,
@@ -384,9 +388,12 @@ public class RoboboManager extends Binder
      * @param message Body of the message
      */
     public void log(String tag, String message){
-        message = tag+": "+message;
-
-        log.debug(message);
+        String formattedmessage = tag+": "+message;
+        if (log != null) {
+            log.debug(formattedmessage);
+        }else {
+            Log.d(tag, message);
+        }
 
     }
 
@@ -396,30 +403,56 @@ public class RoboboManager extends Binder
      * @param tag Tag of the message
      * @param message Body of the message
      */
-    public void log(LogLvl logLevel, String tag, String message){
+    public void log(LogLvl logLevel, String tag, String message) {
 
-        message = tag+": "+message;
-        switch (logLevel){
-            case DEBUG:
-                log.debug(message);
-                break;
+        String formattedmessage = tag + ": " + message;
 
-            case INFO:
-                log.info(message);
-                break;
+        if (log != null) {
+            switch (logLevel) {
+                case DEBUG:
+                    log.debug(formattedmessage);
+                    break;
 
-            case WARNING:
-                log.warn(message);
-                break;
+                case INFO:
+                    log.info(formattedmessage);
+                    break;
 
-            case ERROR:
-                log.error(message);
-                break;
+                case WARNING:
+                    log.warn(formattedmessage);
+                    break;
 
-            case TRACE:
-                log.trace(message);
-                break;
+                case ERROR:
+                    log.error(formattedmessage);
+                    break;
+
+                case TRACE:
+                    log.trace(formattedmessage);
+                    break;
+            }
+        }else {
+            switch (logLevel) {
+                case DEBUG:
+                    Log.d(tag,message);
+                    break;
+
+                case INFO:
+                    Log.i(tag, message);
+                    break;
+
+                case WARNING:
+                    Log.w(tag, message);
+                    break;
+
+                case ERROR:
+                    Log.e(tag,message);
+                    break;
+
+                case TRACE:
+                    Log.v(tag,message);
+                    break;
+            }
         }
     }
+
 
 }

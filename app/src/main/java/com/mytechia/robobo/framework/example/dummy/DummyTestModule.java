@@ -49,6 +49,7 @@ public class DummyTestModule implements IModule
         System.out.println(String.format("Starting up dummy module %d!", id));
         m = manager;
         m.log(this.getClass().getSimpleName(), String.format("Starting up dummy module %d!", id));
+
     }
 
     @Override
