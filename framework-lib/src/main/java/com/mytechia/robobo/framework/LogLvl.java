@@ -21,7 +21,7 @@ package com.mytechia.robobo.framework;
 
 /**
  * Levels of logging
- * Trace < Debug < Info < Warning < Error
+ * Trace  Debug  Info  Warning  Error
  */
 public enum LogLvl {
     TRACE, DEBUG, INFO, WARNING, ERROR

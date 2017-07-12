@@ -82,6 +82,7 @@ public class RoboboManager extends Binder
     private final IDIContainer diContainer;
     
     private int modulesIndex = 0;
+    private int modulesCount = 0;
 
     private RoboboManagerState state = RoboboManagerState.CREATED;
 
@@ -102,6 +103,7 @@ public class RoboboManager extends Binder
         this.modules = new LinkedList<>();
         this.diContainer = new PicoContainerWrapper();
         this.listeners = new ArrayList<>(2);
+
 
 
         lc = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -225,7 +227,7 @@ public class RoboboManager extends Binder
      * @return true if there is more subsystems to load, false otherwise
      */
     private boolean isNextModule() {
-        return this.modulesIndex < this.modulesFile.values().size();
+        return this.modulesCount < this.modulesFile.values().size();
     }
     
     
@@ -237,8 +239,13 @@ public class RoboboManager extends Binder
      * @throws IllegalAccessException 
      */
     private IModule registerNextModule() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        final String propertyName = String.format(MODULE_LOADER_KEY, this.modulesIndex++);
-        
+        String key= String.format(MODULE_LOADER_KEY, this.modulesIndex++);
+
+        while (!modulesFile.containsKey(key)){
+            key= String.format(MODULE_LOADER_KEY, this.modulesIndex++);
+        }
+
+        final String propertyName = key;
         String ssLoaderClassName = modulesFile.getProperty(propertyName);
         
         Objects.requireNonNull(ssLoaderClassName, String.format("Not found property=%s", propertyName));
@@ -248,7 +255,7 @@ public class RoboboManager extends Binder
         IModule module = (IModule) ssLoaderClass.newInstance(); 
         
         registerModuleInstance(module, ssLoaderClass);
-        
+        modulesCount++;
         return module;
     }
 
