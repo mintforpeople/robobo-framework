@@ -26,6 +26,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -45,10 +46,6 @@ import java.util.Properties;
  */
 public class RoboboService extends Service implements RoboboManagerListener {
 
-    private int ROBOBO_NOTIFICATION_ID = 808080;
-
-    private NotificationManager mNotificationManager;
-
     private RoboboManager roboboManager;
 
 
@@ -56,19 +53,21 @@ public class RoboboService extends Service implements RoboboManagerListener {
     public void onCreate() {
         super.onCreate();
 
-        //sets the serice as a foreground service with a notification
-        mNotificationManager =
-                (NotificationManager) getSystemService(getApplicationContext().NOTIFICATION_SERVICE);
 
-        //showServiceNotification();
+
+
+    }
+
+
+    private void launchRoboboManager(Bundle roboboOptions) {
 
         try {
 
             //by default it loads the modules from a config file en 'assets'
             Properties modules = loadDefaultPropertiesFile();
 
-            roboboManager = RoboboManager.instantiate(modules, getApplication());
-            roboboManager.addFrameworkListener(this);
+            this.roboboManager = RoboboManager.instantiate(modules, roboboOptions, getApplication());
+            this.roboboManager.addFrameworkListener(this);
 
             //starts the framework manager in a separate thread
             startUpManagerInThread();
@@ -76,6 +75,7 @@ public class RoboboService extends Service implements RoboboManagerListener {
         }
         catch(IOException ex) {
             Log.e("ROBOBO-FRAMEWORK", ex.getMessage());
+
         }
 
     }
@@ -109,7 +109,7 @@ public class RoboboService extends Service implements RoboboManagerListener {
                         roboboManager.startup();
 
                 } catch (InternalErrorException e) {
-                    Log.e("ROBOBO-FRAMEWORK", e.getMessage());
+                    roboboManagerStatupError(e);
                 }
 
             }
@@ -120,36 +120,27 @@ public class RoboboService extends Service implements RoboboManagerListener {
     }
 
 
-    /** Sets the service as a foreground service and shows a notification
-     */
-    private void showServiceNotification() {
+    private void roboboManagerStatupError(InternalErrorException ex) {
 
-        Notification.Builder notificationBuilder = getBaseNotificationBuilder()
-                .setContentText("The framework is starting up.");
+        if (roboboManager != null) {
+            try {
 
-        startForeground(ROBOBO_NOTIFICATION_ID, notificationBuilder.build());
+                roboboManager.shutdown();
 
-    }
+            } catch (InternalErrorException e1) {
+                Log.e("ROBOBO-FRAMEWORK", e1.getMessage());
+            }
+        }
 
 
-    private void showErrorOnNotification(String errorMsg) {
-
-        showOnNotification("ERROR: " + errorMsg);
 
     }
 
 
-    private void showOnNotification(String msg) {
-
-        Notification.Builder notificationBuilder = getBaseNotificationBuilder()
-                .setContentText(msg);
-
-        mNotificationManager.notify(ROBOBO_NOTIFICATION_ID, notificationBuilder.build());
-
-    }
 
 
-    /** Sets-up the basic configuration of the notifcation (title, etc.)
+
+    /** Sets-up the basic configuration of the notification (title, etc.)
      *
      * @return A Notification.Builder with a title and a logo
      */
@@ -170,12 +161,27 @@ public class RoboboService extends Service implements RoboboManagerListener {
                 roboboManager.shutdown();
 
         } catch (InternalErrorException e) {
+
         }
 
     }
 
+
+    private Bundle getRoboboOptions(Intent intent) {
+        Bundle roboboOptions = intent.getExtras();
+        if (roboboOptions == null) {
+            roboboOptions = new Bundle();
+        }
+        return roboboOptions;
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
+
+        if (this.roboboManager == null) {
+            //if the framework has not been started up yet (nobody has binded yet)
+            launchRoboboManager(getRoboboOptions(intent));
+        }
 
         return this.roboboManager;
 
@@ -197,4 +203,12 @@ public class RoboboService extends Service implements RoboboManagerListener {
 
 
     }
+
+    @Override
+    public void frameworkError(Exception ex) {
+
+    }
+
+
+
 }

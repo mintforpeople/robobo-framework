@@ -32,6 +32,7 @@ public enum RoboboManagerState {
     ALL_MODULES_LOADED,
     RUNNING,
     STOPPING,
-    STOPPED
+    STOPPED,
+    ERROR
 
 }

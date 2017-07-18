@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Robobo Framework</string>
+    <string name="robobo_framework_app_name">App Robobo Framework</string>
     <string name="title_activity_robobo_custom_main">RoboboCustomMainActivity</string>
     <string name="msg_custom_activity">Robobo Custom Display Activity Example</string>
     <string name="error_unable_read_modules_config_file">Unable to read Robobo modules configuration file.</string>

@@ -3,14 +3,15 @@ apply plugin: 'com.android.library'
 android {
 
     compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    buildToolsVersion "23.0.2"
 
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 23
-        versionCode 8
-        versionName "1.0.0-SNAPSHOT"
+        versionCode 14
+        versionName "1.0.0"
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -21,13 +22,19 @@ android {
         disable 'InvalidPackage'
     }
 
+
+}
+
+configurations{
+    custom
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.mytechia:mytechia-commons-library:1.3.0'
-    compile 'com.mytechia:mytechia-commons-di:1.3.0'
+    compile ('com.mytechia:mytechia-commons-di:1.3.1')
+
 
     compile 'org.slf4j:slf4j-api:1.7.21'
     compile 'com.github.tony19:logback-android-core:1.1.1-6'
@@ -37,8 +44,10 @@ dependencies {
     }
 }
 
-apply from: 'https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle'
 
+
+
+apply from: 'https://raw.github.com/chrisbanes/gradle-mvn-push/master/gradle-mvn-push.gradle'
 
 
 afterEvaluate { project ->

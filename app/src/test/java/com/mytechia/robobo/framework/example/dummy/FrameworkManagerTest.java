@@ -24,6 +24,7 @@ package com.mytechia.robobo.framework.example.dummy;
 
 import com.mytechia.commons.framework.exception.InternalErrorException;
 import com.mytechia.robobo.framework.RoboboManager;
+import com.mytechia.robobo.framework.exception.ModuleNotFoundException;
 
 import java.util.Properties;
 import java.util.logging.Level;
@@ -65,8 +66,8 @@ public class FrameworkManagerTest {
     //
     // @Test
     // public void hello() {}
-    
-    
+
+
     @Test
     public void testStartup() {
 
@@ -75,9 +76,35 @@ public class FrameworkManagerTest {
         modules.put("robobo.module.1", "com.mytechia.robobo.framework.example.dummy.DummyTestModule2");
 
 
-        RoboboManager frameworkManager = RoboboManager.instantiate(modules, null);
+        RoboboManager frameworkManager = RoboboManager.instantiate(modules, null, null);
 
         try {
+
+            frameworkManager.startup();
+
+            assertNotNull(frameworkManager.getModuleInstance(DummyTestModule1.class));
+            assertNotNull(frameworkManager.getModuleInstance(DummyTestModule2.class));
+
+
+            frameworkManager.shutdown();
+
+
+        } catch (InternalErrorException ex) {
+            Logger.getLogger(FrameworkManagerTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @Test(expected=ModuleNotFoundException.class)
+    public void testShutdown() throws InternalErrorException{
+
+        Properties modules = new Properties();
+        modules.put("robobo.module.0", "com.mytechia.robobo.framework.example.dummy.DummyTestModule1");
+        modules.put("robobo.module.1", "com.mytechia.robobo.framework.example.dummy.DummyTestModule2");
+
+
+        RoboboManager frameworkManager = RoboboManager.instantiate(modules, null, null);
+
+
 
             frameworkManager.startup();
 
@@ -91,11 +118,11 @@ public class FrameworkManagerTest {
             assertNull(frameworkManager.getModuleInstance(DummyTestModule2.class));
 
 
-        } catch (InternalErrorException ex) {
-            Logger.getLogger(FrameworkManagerTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
+
+
 
     }
+
     
     
     

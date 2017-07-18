@@ -23,6 +23,8 @@
 
 package com.mytechia.robobo.framework.example.dummy;
 
+import android.util.Log;
+
 import com.mytechia.commons.framework.exception.InternalErrorException;
 import com.mytechia.robobo.framework.RoboboManager;
 import com.mytechia.robobo.framework.IModule;
@@ -44,13 +46,16 @@ public class DummyTestModule implements IModule
 
     @Override
     public void startup(RoboboManager manager) throws InternalErrorException {
+        System.out.println(String.format("Starting up dummy module %d!", id));
         m = manager;
         m.log(this.getClass().getSimpleName(), String.format("Starting up dummy module %d!", id));
-        }
+
+    }
 
     @Override
     public void shutdown() throws InternalErrorException {
-       m.log(this.getClass().getSimpleName(), String.format("Shutting down dummy module %d!", id));
+        m.log(this.getClass().getSimpleName(), String.format("Shutting down dummy module %d!", id));
+
     }
 
     @Override

@@ -1,6 +1,5 @@
 <resources>
-    <string name="app_name">Robobo Framework</string>
-    <string name="frameworkVersion">0.2.0</string>
+    <string name="framework_lib_name">Robobo Framework</string>
     <string name="msg_loading_module">Cargando módulo:</string>
     <string name="msg_framework_running">Robobo Framework se está ejecutando!</string>
     <string name="msg_framework_modules_active">Módulos activos:</string>
