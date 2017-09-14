@@ -46,6 +46,7 @@ import java.util.Properties;
  */
 public class RoboboService extends Service implements RoboboManagerListener {
 
+    public static final String TAG = "RoboboService";
     private RoboboManager roboboManager;
 
 
@@ -155,13 +156,15 @@ public class RoboboService extends Service implements RoboboManagerListener {
     public void onDestroy() {
         super.onDestroy();
 
+        Log.d(TAG, "onDestroy");
+
         try {
 
             if (roboboManager != null)
                 roboboManager.shutdown();
 
         } catch (InternalErrorException e) {
-
+            Log.e(TAG, "onDestroy", e);
         }
 
     }

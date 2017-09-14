@@ -137,7 +137,7 @@ public class RoboboManager extends Binder
      *
      * @throws InternalErrorException if there was an error while loading the modules
      */
-    public void startup() throws InternalErrorException {
+    public synchronized void startup() throws InternalErrorException {
 
         if (state == RoboboManagerState.CREATED) {
 
@@ -187,7 +187,7 @@ public class RoboboManager extends Binder
      *
      * @throws InternalErrorException if there was an error while shutting down the modules
      */
-    public void shutdown() throws InternalErrorException {
+    public synchronized void shutdown() throws InternalErrorException {
 
 
         log(LogLvl.INFO,"ROBOBO-MANAGER", "Shutting down Robobo Manager.");
