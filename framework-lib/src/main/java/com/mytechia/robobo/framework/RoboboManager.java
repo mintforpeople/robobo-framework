@@ -86,6 +86,8 @@ public class RoboboManager extends Binder
 
     private RoboboManagerState state = RoboboManagerState.CREATED;
 
+    private Exception exception;
+
     private final ArrayList<RoboboManagerListener> listeners;
 
 
@@ -133,11 +135,18 @@ public class RoboboManager extends Binder
     }
 
 
+    public RoboboManagerState state(){
+        return this.state;
+    }
+
+
     /** Starts the framework and the configured Robobo modules.
      *
      * @throws InternalErrorException if there was an error while loading the modules
      */
     public synchronized void startup() throws InternalErrorException {
+
+        this.exception=null;
 
         if (state == RoboboManagerState.CREATED) {
 
@@ -219,7 +228,11 @@ public class RoboboManager extends Binder
     public Bundle getOptions() {
         return this.options;
     }
-    
+
+
+    public Exception exception(){
+        return this.exception;
+    }
     
     
     /** Checks whether there is more subsystems to load or not
@@ -344,6 +357,8 @@ public class RoboboManager extends Binder
     }
 
     private void frameworkError(Exception ex) {
+
+        this.exception=ex;
 
         log(LogLvl.ERROR,"ROBOBO-MANAGER", ex.getMessage());
 

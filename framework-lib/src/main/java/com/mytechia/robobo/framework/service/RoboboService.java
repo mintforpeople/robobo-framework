@@ -23,21 +23,19 @@
 package com.mytechia.robobo.framework.service;
 
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-
 import com.mytechia.commons.framework.exception.InternalErrorException;
-import com.mytechia.robobo.framework.RoboboManagerListener;
-import com.mytechia.robobo.framework.RoboboManager;
-import com.mytechia.robobo.framework.RoboboManagerState;
 import com.mytechia.robobo.framework.R;
-
+import com.mytechia.robobo.framework.RoboboManager;
+import com.mytechia.robobo.framework.RoboboManagerListener;
+import com.mytechia.robobo.framework.RoboboManagerState;
 import java.io.IOException;
 import java.util.Properties;
+
 
 /** An Android service to start and manage the creation of the Robobo Framework instance.
  *
@@ -66,17 +64,24 @@ public class RoboboService extends Service implements RoboboManagerListener {
 
             //by default it loads the modules from a config file en 'assets'
             Properties modules = loadDefaultPropertiesFile();
-
             this.roboboManager = RoboboManager.instantiate(modules, roboboOptions, getApplication());
-            this.roboboManager.addFrameworkListener(this);
-
-            //starts the framework manager in a separate thread
-            startUpManagerInThread();
-
         }
         catch(IOException ex) {
             Log.e("ROBOBO-FRAMEWORK", ex.getMessage());
+            roboboManagerStatupError(ex);
+        }
 
+        this.roboboManager.addFrameworkListener(this);
+
+        try {
+
+            if (roboboManager != null) {
+                roboboManager.startup();
+            }
+
+        } catch (InternalErrorException ex) {
+            Log.e("ROBOBO-FRAMEWORK", ex.getMessage());
+            roboboManagerStatupError(ex);
         }
 
     }
@@ -96,38 +101,14 @@ public class RoboboService extends Service implements RoboboManagerListener {
 
     }
 
-    /** Starts the framework manager in a separate thread.
-     */
-    private void startUpManagerInThread() {
-
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                try {
-
-                    if (roboboManager != null)
-                        roboboManager.startup();
-
-                } catch (InternalErrorException e) {
-                    roboboManagerStatupError(e);
-                }
-
-            }
-        });
-
-        t.start();
-
-    }
 
 
-    private void roboboManagerStatupError(InternalErrorException ex) {
+    private void roboboManagerStatupError(Throwable ex) {
 
         if (roboboManager != null) {
             try {
 
                 roboboManager.shutdown();
-
             } catch (InternalErrorException e1) {
                 Log.e("ROBOBO-FRAMEWORK", e1.getMessage());
             }
@@ -160,8 +141,10 @@ public class RoboboService extends Service implements RoboboManagerListener {
 
         try {
 
-            if (roboboManager != null)
+            if (roboboManager != null) {
                 roboboManager.shutdown();
+                roboboManager=null;
+            }
 
         } catch (InternalErrorException e) {
             Log.e(TAG, "onDestroy", e);

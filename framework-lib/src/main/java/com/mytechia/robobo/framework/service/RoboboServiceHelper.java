@@ -28,12 +28,14 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.mytechia.robobo.framework.RoboboManager;
 import com.mytechia.robobo.framework.RoboboManagerListener;
 import com.mytechia.robobo.framework.RoboboManagerState;
 
-/** A helper class to facilitate the bind/unbind and the
+/**
+ * A helper class to facilitate the bind/unbind and the
  * management of the start process of the of the Robobo Manager
  * using the Robobo Service.
  *
@@ -57,7 +59,8 @@ public class RoboboServiceHelper {
     }
 
 
-    /** Starts the Robobo Manager and binds the activity to the service.
+    /**
+     * Starts the Robobo Manager and binds the activity to the service.
      * Then the manager has finished loading all the modules, the Listener
      * interface is used to notify the instance of the Robobo Manager.
      */
@@ -67,38 +70,37 @@ public class RoboboServiceHelper {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
 
-                if (service != null) {
-                    roboboManager = (RoboboManager) service;
+                roboboManager = (RoboboManager) service;
 
-                    //it is possible that the framework has not yet finished starting
+                if (roboboManager.state() == RoboboManagerState.ERROR) {
+                    listener.onError(roboboManager.exception());
+                } else {
                     roboboManager.addFrameworkListener(new RoboboListener());
-
-                    //or may be it has finished
-                    if (roboboManager.isStartedUp()) {
-                        frameworkStarted();
-                    }
+                    frameworkStarted();
                 }
-                else {
-                    listener.onError("Unable to find Robobo service.");
-                }
-
             }
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
                 roboboManager = null;
+                listener.onError(null);
             }
+
         };
 
         Intent intent = new Intent(activity, RoboboService.class);
+
         if (roboboOptions == null) roboboOptions = new Bundle();
+
         intent.putExtras(roboboOptions);
+
         activity.bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
     }
 
 
-    /** Unbinds the activity from the service.
+    /**
+     * Unbinds the activity from the service.
      */
     public void unbindRoboboService() {
 
@@ -107,7 +109,8 @@ public class RoboboServiceHelper {
     }
 
 
-    /** Shows a new activity in the Robobo display.
+    /**
+     * Shows a new activity in the Robobo display.
      * This activity can also use the helper to access the RoboboManager.
      */
     public void launchDisplayActivity(Class activityClass) {
@@ -126,46 +129,40 @@ public class RoboboServiceHelper {
     }
 
 
-
     private class RoboboListener implements RoboboManagerListener {
 
         @Override
-        public void loadingModule(final String moduleInfo, String moduleVersion) {
-
-        }
+        public void loadingModule(final String moduleInfo, String moduleVersion) {}
 
         @Override
-        public void moduleLoaded(String moduleInfo, String moduleVersion) {
-
-        }
+        public void moduleLoaded(String moduleInfo, String moduleVersion) {}
 
         @Override
         public void frameworkStateChanged(RoboboManagerState state) {
-
             if (state == RoboboManagerState.RUNNING) {
                 //if the framework has finished starting up
                 frameworkStarted();
             }
-
         }
 
 
         @Override
         public void frameworkError(Exception ex) {
-            listener.onError(ex.getMessage());
+            listener.onError(ex);
         }
 
     }
 
 
-    /** Callback interface that must be used to be notified of the successul startup (or not)
+    /**
+     * Callback interface that must be used to be notified of the successul startup (or not)
      * of the Robobo Manager, and to obtain an instance of it.
      */
     public interface Listener {
 
         void onRoboboManagerStarted(RoboboManager roboboManaer);
 
-        void onError(String errorMsg);
+        void onError(Exception ex);
 
     }
 
