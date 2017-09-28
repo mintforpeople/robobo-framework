@@ -35,6 +35,8 @@ import com.mytechia.commons.di.container.IDIContainer;
 import com.mytechia.commons.di.container.PicoContainerWrapper;
 import com.mytechia.commons.framework.exception.InternalErrorException;
 import com.mytechia.robobo.framework.exception.ModuleNotFoundException;
+import com.mytechia.robobo.framework.power.IPowerModeListener;
+import com.mytechia.robobo.framework.power.PowerMode;
 
 
 import java.util.ArrayList;
@@ -88,7 +90,11 @@ public class RoboboManager extends Binder
 
     private Exception exception;
 
+    private PowerMode powerMode = PowerMode.NORMAL;
+
     private final ArrayList<RoboboManagerListener> listeners;
+    private final ArrayList<IPowerModeListener> powerModeListeners;
+
 
 
     private static RoboboManager _instance = null;
@@ -105,6 +111,7 @@ public class RoboboManager extends Binder
         this.modules = new LinkedList<>();
         this.diContainer = new PicoContainerWrapper();
         this.listeners = new ArrayList<>(2);
+        this.powerModeListeners = new ArrayList<>(5);
 
 
 
@@ -112,11 +119,6 @@ public class RoboboManager extends Binder
         StatusPrinter.print(lc);
         log = LoggerFactory.getLogger("com.mytechia.robobo.framework");
         log.info("Starting Robobo Framework");
-
-
-
-
-
 
     }
 
@@ -478,5 +480,36 @@ public class RoboboManager extends Binder
         }
     }
 
+
+
+    //POWER MODE MANAGEMENT
+
+
+    public void changePowerModeTo(PowerMode newMode) {
+        if (newMode != this.powerMode) {
+            this.powerMode = newMode;
+            Thread t = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    notifyPowerModeChange();
+                }
+            });
+            t.start();
+        }
+    }
+
+    private void notifyPowerModeChange() {
+        for(IPowerModeListener l : this.powerModeListeners) {
+            l.onPowerModeChange(this.powerMode);
+        }
+    }
+
+    public void subscribeToPowerModeChanges(IPowerModeListener listener) {
+        this.powerModeListeners.add(listener);
+    }
+
+    public void unsubscribeFromPowerModeChanges(IPowerModeListener listener) {
+        this.powerModeListeners.remove(listener);
+    }
 
 }
