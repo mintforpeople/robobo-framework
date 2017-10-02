@@ -25,7 +25,6 @@ package com.mytechia.robobo.framework;
 
 import android.app.Application;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.util.Log;
@@ -50,8 +49,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.util.ContextInitializer;
-import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.util.StatusPrinter;
 
 
@@ -91,6 +88,7 @@ public class RoboboManager extends Binder
     private Exception exception;
 
     private PowerMode powerMode = PowerMode.NORMAL;
+    private boolean powerManagement = true;
 
     private final ArrayList<RoboboManagerListener> listeners;
     private final ArrayList<IPowerModeListener> powerModeListeners;
@@ -482,10 +480,42 @@ public class RoboboManager extends Binder
 
 
 
+
+
     //POWER MODE MANAGEMENT
 
 
-    public void changePowerModeTo(PowerMode newMode) {
+    /** Enables or disables the power management features of the framework.
+     * When disabled, the frame is locked in PowerMode.NORMAL
+     * WHen enabled, apps or modules can change the power mode from NORMAL to LOWPOWER and
+     * viceversa. In LOWPOWER mode modules are "invited" to free resources and stop
+     * consuming processor time and memory.
+     *
+     * @param enabled whether to enable or disable power management
+     */
+    public void setPowerManagementEnabled(boolean enabled) {
+        this.powerManagement = enabled;
+        if (!isPowerManagementEnabled()) {
+            forcePowerModeTo(PowerMode.NORMAL);
+        }
+    }
+
+
+    /** Checks whether the power management is enabled or not
+     *
+     * @return whether the power management is enabled or not
+     */
+    public boolean isPowerManagementEnabled() {
+        return this.powerManagement;
+    }
+
+
+    /** Private method to internally change the power mode of the robot.
+     * It allows to change the mode without looking at the power management state.
+     *
+     * @param newMode new power mode.
+     */
+    private void forcePowerModeTo(PowerMode newMode) {
         if (newMode != this.powerMode) {
             this.powerMode = newMode;
             Thread t = new Thread(new Runnable() {
@@ -498,16 +528,37 @@ public class RoboboManager extends Binder
         }
     }
 
+    /** Changes the power mode to a new one.
+     * Only changes the mode if the new one is diferent than the previous one and power
+     * management is enabled
+     *
+     * @param newMode new power mode
+     */
+    public void changePowerModeTo(PowerMode newMode) {
+        if (isPowerManagementEnabled()) {
+            forcePowerModeTo(newMode);
+        }
+    }
+
+
     private void notifyPowerModeChange() {
         for(IPowerModeListener l : this.powerModeListeners) {
             l.onPowerModeChange(this.powerMode);
         }
     }
 
+    /** Subscribes a listener to power mode change events.
+     *
+     * @param listener the listener to receive power mode change events
+     */
     public void subscribeToPowerModeChanges(IPowerModeListener listener) {
         this.powerModeListeners.add(listener);
     }
 
+    /** Unsubscribes a listener to power mode change events.
+     *
+     * @param listener the listener to unsubscribe
+     */
     public void unsubscribeFromPowerModeChanges(IPowerModeListener listener) {
         this.powerModeListeners.remove(listener);
     }
