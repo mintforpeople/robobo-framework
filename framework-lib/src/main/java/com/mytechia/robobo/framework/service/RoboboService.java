@@ -164,7 +164,7 @@ public class RoboboService extends Service implements RoboboManagerListener {
     @Override
     public IBinder onBind(Intent intent) {
 
-        if (this.roboboManager == null) {
+        if ((this.roboboManager == null) || (this.roboboManager.state()==RoboboManagerState.STOPPED)) {
             //if the framework has not been started up yet (nobody has binded yet)
             launchRoboboManager(getRoboboOptions(intent));
         }

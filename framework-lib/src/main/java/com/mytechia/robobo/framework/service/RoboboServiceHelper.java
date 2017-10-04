@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.mytechia.commons.framework.exception.InternalErrorException;
 import com.mytechia.robobo.framework.RoboboManager;
 import com.mytechia.robobo.framework.RoboboManagerListener;
 import com.mytechia.robobo.framework.RoboboManagerState;
@@ -42,6 +43,9 @@ import com.mytechia.robobo.framework.RoboboManagerState;
  * @author Gervasio Varela
  */
 public class RoboboServiceHelper {
+
+
+    public static final String TAG ="RoboboServiceHelper";
 
 
     private Activity activity;
@@ -73,11 +77,22 @@ public class RoboboServiceHelper {
                 roboboManager = (RoboboManager) service;
 
                 if (roboboManager.state() == RoboboManagerState.ERROR) {
+
                     listener.onError(roboboManager.exception());
-                } else {
-                    roboboManager.addFrameworkListener(new RoboboListener());
-                    frameworkStarted();
+
+                    return;
+
                 }
+
+                if ((roboboManager.state() == RoboboManagerState.STOPPING) || (roboboManager.state() == RoboboManagerState.STOPPED)) {
+
+                    listener.onError(new RoboboManagerInvalidStateException(String.format("Try to use a robobo manager with status %s. You can not use old instances of the RoboboManager", roboboManager.state())));
+                }
+
+                roboboManager.addFrameworkListener(new RoboboListener());
+
+                frameworkStarted();
+
             }
 
             @Override
@@ -103,6 +118,17 @@ public class RoboboServiceHelper {
      * Unbinds the activity from the service.
      */
     public void unbindRoboboService() {
+
+        //Si todo fuera bien con Android, RoboboServicie debería hacer un shutdown del robomanager
+        //dentro de su destroy cuando  ya no tiene ningun bind. Pero como no siempre es llamado el metodo
+        //onDestroy del RoboboServicie para asegurarnos que detenemos todos los modulos debemos invocar el shutdown aqui.
+        //Parece que el metodo RoboboServicie.onDestroy e incluso el RoboboServicie.onUnbind no son llamados cuando se
+        //pulsa el botón para atrás.
+        try {
+            roboboManager.shutdown();
+        } catch (InternalErrorException ex) {
+            Log.e(TAG, "Error shutdow Robobo Manager", ex);
+        }
 
         activity.unbindService(connection);
 
