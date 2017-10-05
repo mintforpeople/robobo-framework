@@ -124,10 +124,12 @@ public class RoboboServiceHelper {
         //onDestroy del RoboboServicie para asegurarnos que detenemos todos los modulos debemos invocar el shutdown aqui.
         //Parece que el metodo RoboboServicie.onDestroy e incluso el RoboboServicie.onUnbind no son llamados cuando se
         //pulsa el botón para atrás.
-        try {
-            roboboManager.shutdown();
-        } catch (InternalErrorException ex) {
-            Log.e(TAG, "Error shutdow Robobo Manager", ex);
+        if (roboboManager != null) {
+            try {
+                roboboManager.shutdown();
+            } catch (InternalErrorException ex) {
+                Log.e(TAG, "Error shutdow Robobo Manager", ex);
+            }
         }
 
         activity.unbindService(connection);
