@@ -191,7 +191,7 @@ public class RoboboService extends Service implements RoboboManagerListener {
     }
 
     @Override
-    public void frameworkError(Exception ex) {
+    public void frameworkError(Throwable ex) {
 
     }
 

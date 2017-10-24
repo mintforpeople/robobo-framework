@@ -175,9 +175,11 @@ public class RoboboServiceHelper {
 
 
         @Override
-        public void frameworkError(Exception ex) {
+        public void frameworkError(Throwable ex) {
             listener.onError(ex);
         }
+
+
 
     }
 
@@ -190,7 +192,7 @@ public class RoboboServiceHelper {
 
         void onRoboboManagerStarted(RoboboManager roboboManaer);
 
-        void onError(Exception ex);
+        void onError(Throwable ex);
 
     }
 
