@@ -30,11 +30,11 @@ import com.mytechia.commons.framework.exception.InternalErrorException;
 import com.mytechia.robobo.framework.IModule;
 import com.mytechia.robobo.framework.RoboboManager;
 
-/** An abstract class to facilitate the implemention of new behaviours for the Robobo robot
+/** An abstract class to facilitate the implementation of new behaviours/apps for the Robobo robot
  *
- * User must override three methods:
- * startBehaviour() -- To setup the behaviour execution, like suscribing listeners and accesing robobo modules
- * stopBehaviour() -- To release resources, like unsuscribing listeners
+ * Users must override three methods:
+ * startBehaviour() -- To setup the behaviour execution, like subscribing to listeners and obtain access to robobo modules
+ * stopBehaviour() -- To release resources, like unsubscribing listeners
  * runStep() -- To execute some logic periodically
  *
  * @author Gervasio Varela | gervasio.varela@mytechia.com
