@@ -56,15 +56,14 @@ public class RoboboExampleActivity extends Activity {
         roboboHelper = new RoboboServiceHelper(this, new RoboboServiceHelper.Listener() {
             @Override
             public void onRoboboManagerStarted(RoboboManager roboboManager) {
-
                 RoboboApp app = new RoboboApp(roboboManager);
                 Thread t = new Thread(app);
                 t.start();
-
             }
 
             @Override
-            public void onError(String errorMsg) {}
+            public void onError(Throwable ex) {}
+
         });
 
         Bundle roboboOptions = new Bundle();
