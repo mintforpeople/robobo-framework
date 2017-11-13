@@ -29,13 +29,30 @@ package com.mytechia.robobo.framework;
  */
 public interface RoboboManagerListener {
 
-
+    /**
+     * Called when a module starts to load
+     * @param moduleInfo information of the module
+     * @param moduleVersion version od the module
+     */
     void loadingModule(String moduleInfo, String moduleVersion);
 
+    /**
+     * Called when a module finish to load
+     * @param moduleInfo information of the module
+     * @param moduleVersion version od the module
+     */
     void moduleLoaded(String moduleInfo, String moduleVersion);
 
+    /**
+     * Called when the manager changes its state
+     * @param state current manager state
+     */
     void frameworkStateChanged(RoboboManagerState state);
 
+    /**
+     * Called when the framework throws an exception
+     * @param ex the exception
+     */
     void frameworkError(Throwable ex);
 
 

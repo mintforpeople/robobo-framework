@@ -60,9 +60,16 @@ public interface IModule
      */
     public void shutdown() throws InternalErrorException;
 
-
+    /**
+     * Gets the information from the module
+     * @return information string
+     */
     public String getModuleInfo();
 
+    /**
+     * Gets the version number
+     * @return version number
+     */
     public String getModuleVersion();
     
 }
