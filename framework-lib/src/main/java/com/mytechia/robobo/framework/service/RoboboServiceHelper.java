@@ -119,16 +119,16 @@ public class RoboboServiceHelper {
      */
     public void unbindRoboboService() {
 
-        //Si todo fuera bien con Android, RoboboServicie debería hacer un shutdown del robomanager
+        //Si todo fuera bien con Android, RoboboService debería hacer un shutdown del robomanager
         //dentro de su destroy cuando  ya no tiene ningun bind. Pero como no siempre es llamado el metodo
         //onDestroy del RoboboServicie para asegurarnos que detenemos todos los modulos debemos invocar el shutdown aqui.
-        //Parece que el metodo RoboboServicie.onDestroy e incluso el RoboboServicie.onUnbind no son llamados cuando se
+        //Parece que el metodo RoboboServicie.onDestroy e incluso el RoboboService.onUnbind no son llamados cuando se
         //pulsa el botón para atrás.
         if (roboboManager != null) {
             try {
                 roboboManager.shutdown();
             } catch (InternalErrorException ex) {
-                Log.e(TAG, "Error shutdow Robobo Manager", ex);
+                Log.e(TAG, "Error shutdown Robobo Manager", ex);
             }
         }
 

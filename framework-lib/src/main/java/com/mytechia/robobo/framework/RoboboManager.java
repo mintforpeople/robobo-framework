@@ -34,6 +34,8 @@ import com.mytechia.commons.di.container.IDIContainer;
 import com.mytechia.commons.di.container.PicoContainerWrapper;
 import com.mytechia.commons.framework.exception.InternalErrorException;
 import com.mytechia.robobo.framework.exception.ModuleNotFoundException;
+import com.mytechia.robobo.framework.frequency.FrequencyMode;
+import com.mytechia.robobo.framework.frequency.IFrequencyModeListener;
 import com.mytechia.robobo.framework.power.IPowerModeListener;
 import com.mytechia.robobo.framework.power.PowerMode;
 
@@ -87,10 +89,12 @@ public class RoboboManager extends Binder {
     private Throwable exception;
 
     private PowerMode powerMode = PowerMode.NORMAL;
+    private FrequencyMode frequencyMode = FrequencyMode.NORMAL;
     private boolean powerManagement = true;
 
     private final ArrayList<RoboboManagerListener> listeners;
     private final ArrayList<IPowerModeListener> powerModeListeners;
+    private final ArrayList<IFrequencyModeListener> frequencyModeListeners;
 
 
     private static RoboboManager _instance = null;
@@ -107,6 +111,7 @@ public class RoboboManager extends Binder {
         this.diContainer = new PicoContainerWrapper();
         this.listeners = new ArrayList<>(2);
         this.powerModeListeners = new ArrayList<>(5);
+        this.frequencyModeListeners = new ArrayList<>(5);
 
 
         lc = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -585,6 +590,12 @@ public class RoboboManager extends Binder {
         }
     }
 
+    public void changeFrequencyModeTo(FrequencyMode newMode){
+        for (IFrequencyModeListener l : this.frequencyModeListeners) {
+            l.onFrequencyModeChanged(this.frequencyMode);
+        }
+    }
+
     /**
      * Subscribes a listener to power mode change events.
      *
@@ -601,6 +612,24 @@ public class RoboboManager extends Binder {
      */
     public void unsubscribeFromPowerModeChanges(IPowerModeListener listener) {
         this.powerModeListeners.remove(listener);
+    }
+
+    /**
+     * Subscribes a listener to frequency mode change events.
+     *
+     * @param listener the listener to receive frequency mode change events
+     */
+    public void subscribeToFrequencyModeChanges(IFrequencyModeListener listener) {
+        this.frequencyModeListeners.add(listener);
+    }
+
+    /**
+     * Unsubscribes a listener to frequency mode change events.
+     *
+     * @param listener the listener to unsubscribe
+     */
+    public void unsubscribeFromFrequencyModeChanges(IFrequencyModeListener listener) {
+        this.frequencyModeListeners.remove(listener);
     }
 
 }
