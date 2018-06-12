@@ -22,5 +22,5 @@ package com.mytechia.robobo.framework.frequency;
  *
  ******************************************************************************/
 public enum FrequencyMode {
-    LOW, NORMAL, FAST
+    LOW, NORMAL, FAST, MAX
 }
