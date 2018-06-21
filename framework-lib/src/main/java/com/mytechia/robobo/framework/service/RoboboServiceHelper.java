@@ -28,18 +28,24 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 
+import com.mytechia.commons.framework.exception.InternalErrorException;
 import com.mytechia.robobo.framework.RoboboManager;
 import com.mytechia.robobo.framework.RoboboManagerListener;
 import com.mytechia.robobo.framework.RoboboManagerState;
 
-/** A helper class to facilitate the bind/unbind and the
+/**
+ * A helper class to facilitate the bind/unbind and the
  * management of the start process of the of the Robobo Manager
  * using the Robobo Service.
  *
  * @author Gervasio Varela
  */
 public class RoboboServiceHelper {
+
+
+    public static final String TAG ="RoboboServiceHelper";
 
 
     private Activity activity;
@@ -57,7 +63,8 @@ public class RoboboServiceHelper {
     }
 
 
-    /** Starts the Robobo Manager and binds the activity to the service.
+    /**
+     * Starts the Robobo Manager and binds the activity to the service.
      * Then the manager has finished loading all the modules, the Listener
      * interface is used to notify the instance of the Robobo Manager.
      */
@@ -67,47 +74,71 @@ public class RoboboServiceHelper {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
 
-                if (service != null) {
-                    roboboManager = (RoboboManager) service;
+                roboboManager = (RoboboManager) service;
 
-                    //it is possible that the framework has not yet finished starting
-                    roboboManager.addFrameworkListener(new RoboboListener());
+                if (roboboManager.state() == RoboboManagerState.ERROR) {
 
-                    //or may be it has finished
-                    if (roboboManager.isStartedUp()) {
-                        frameworkStarted();
-                    }
+                    listener.onError(roboboManager.exception());
+
+                    return;
+
                 }
-                else {
-                    listener.onError("Unable to find Robobo service.");
+
+                if ((roboboManager.state() == RoboboManagerState.STOPPING) || (roboboManager.state() == RoboboManagerState.STOPPED)) {
+
+                    listener.onError(new RoboboManagerInvalidStateException(String.format("Try to use a robobo manager with status %s. You can not use old instances of the RoboboManager", roboboManager.state())));
                 }
+
+                roboboManager.addFrameworkListener(new RoboboListener());
+
+                frameworkStarted();
 
             }
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
                 roboboManager = null;
+                listener.onError(null);
             }
+
         };
 
         Intent intent = new Intent(activity, RoboboService.class);
+
         if (roboboOptions == null) roboboOptions = new Bundle();
+
         intent.putExtras(roboboOptions);
+
         activity.bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
     }
 
 
-    /** Unbinds the activity from the service.
+    /**
+     * Unbinds the activity from the service.
      */
     public void unbindRoboboService() {
+
+        //Si todo fuera bien con Android, RoboboServicie debería hacer un shutdown del robomanager
+        //dentro de su destroy cuando  ya no tiene ningun bind. Pero como no siempre es llamado el metodo
+        //onDestroy del RoboboServicie para asegurarnos que detenemos todos los modulos debemos invocar el shutdown aqui.
+        //Parece que el metodo RoboboServicie.onDestroy e incluso el RoboboServicie.onUnbind no son llamados cuando se
+        //pulsa el botón para atrás.
+        if (roboboManager != null) {
+            try {
+                roboboManager.shutdown();
+            } catch (InternalErrorException ex) {
+                Log.e(TAG, "Error shutdow Robobo Manager", ex);
+            }
+        }
 
         activity.unbindService(connection);
 
     }
 
 
-    /** Shows a new activity in the Robobo display.
+    /**
+     * Shows a new activity in the Robobo display.
      * This activity can also use the helper to access the RoboboManager.
      */
     public void launchDisplayActivity(Class activityClass) {
@@ -126,46 +157,42 @@ public class RoboboServiceHelper {
     }
 
 
-
     private class RoboboListener implements RoboboManagerListener {
 
         @Override
-        public void loadingModule(final String moduleInfo, String moduleVersion) {
-
-        }
+        public void loadingModule(final String moduleInfo, String moduleVersion) {}
 
         @Override
-        public void moduleLoaded(String moduleInfo, String moduleVersion) {
-
-        }
+        public void moduleLoaded(String moduleInfo, String moduleVersion) {}
 
         @Override
         public void frameworkStateChanged(RoboboManagerState state) {
-
             if (state == RoboboManagerState.RUNNING) {
                 //if the framework has finished starting up
                 frameworkStarted();
             }
-
         }
 
 
         @Override
-        public void frameworkError(Exception ex) {
-            listener.onError(ex.getMessage());
+        public void frameworkError(Throwable ex) {
+            listener.onError(ex);
         }
+
+
 
     }
 
 
-    /** Callback interface that must be used to be notified of the successul startup (or not)
+    /**
+     * Callback interface that must be used to be notified of the successul startup (or not)
      * of the Robobo Manager, and to obtain an instance of it.
      */
     public interface Listener {
 
         void onRoboboManagerStarted(RoboboManager roboboManaer);
 
-        void onError(String errorMsg);
+        void onError(Throwable ex);
 
     }
 

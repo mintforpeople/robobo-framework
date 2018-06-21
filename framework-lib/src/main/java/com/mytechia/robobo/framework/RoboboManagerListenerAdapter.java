@@ -1,7 +1,7 @@
 /*******************************************************************************
  *
  *   Copyright 2016 Mytech Ingenieria Aplicada <http://www.mytechia.com>
- *   Copyright 2016 Gervasio Varela <gervasio.varela@mytechia.com>
+ *   Copyright 2017 Julio Gomez <julio.gomez@mytechia.com>
  *
  *   This file is part of Robobo Framework Library.
  *
@@ -23,20 +23,15 @@
 package com.mytechia.robobo.framework;
 
 
-/** A listener that receives life-cycle events from the Robobo Manager
- *
- * @author Gervasio Varela
- */
-public interface RoboboManagerListener {
+public abstract class RoboboManagerListenerAdapter implements RoboboManagerListener{
 
+    public void loadingModule(String moduleInfo, String moduleVersion){}
 
-    void loadingModule(String moduleInfo, String moduleVersion);
+    public void moduleLoaded(String moduleInfo, String moduleVersion){}
 
-    void moduleLoaded(String moduleInfo, String moduleVersion);
+    public void frameworkStateChanged(RoboboManagerState state){}
 
-    void frameworkStateChanged(RoboboManagerState state);
-
-    void frameworkError(Throwable ex);
+    public void frameworkError(Exception ex){}
 
 
 }
