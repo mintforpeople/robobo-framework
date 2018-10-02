@@ -592,7 +592,7 @@ public class RoboboManager extends Binder {
 
     public void changeFrequencyModeTo(FrequencyMode newMode){
         for (IFrequencyModeListener l : this.frequencyModeListeners) {
-            l.onFrequencyModeChanged(this.frequencyMode);
+            l.onFrequencyModeChanged(newMode);
         }
     }
 
