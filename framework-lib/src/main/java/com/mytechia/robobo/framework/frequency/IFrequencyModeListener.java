@@ -1,5 +1,3 @@
-package com.mytechia.robobo.framework.frequency;
-
 /*******************************************************************************
  *
  *   Copyright 2018 Mytech Ingenieria Aplicada <http://www.mytechia.com>
@@ -21,6 +19,11 @@ package com.mytechia.robobo.framework.frequency;
  *   along with Robobo Framework.  If not, see <http://www.gnu.org/licenses/>.
  *
  ******************************************************************************/
+package com.mytechia.robobo.framework.frequency;
+
+/**
+ * Listener to get notifications about sensor frequency changes
+ */
 public interface IFrequencyModeListener {
     /**
      * Called when the status frequency mode changes

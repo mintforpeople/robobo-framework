@@ -24,7 +24,7 @@ package com.mytechia.robobo.framework.exception;
 
 import com.mytechia.commons.framework.exception.InternalErrorException;
 
-/** THe module requested is not available in this Robobo Framework
+/** The module requested is not available in this Robobo Framework instance
  *
  *
  * @author Gervasio Varela

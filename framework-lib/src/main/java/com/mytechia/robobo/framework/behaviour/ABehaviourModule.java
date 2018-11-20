@@ -59,9 +59,9 @@ public abstract class ABehaviourModule implements IModule {
 
 
 
-    /** Returns the current Robobo manager instace
+    /** Returns the current Robobo manager instance
      *
-     * @return the current Robobo manager instace
+     * @return the current Robobo manager instance
      */
     public final RoboboManager getRobobo() {
         return this.robobo;
